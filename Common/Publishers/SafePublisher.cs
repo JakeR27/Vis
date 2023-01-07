@@ -5,8 +5,8 @@ namespace Vis.Common
 {
     partial class Publishers
     {
-        private static List<IModel> _channels;
-        static class SafePublisher
+        private static List<IModel> _channels = new ();
+        public static class SafePublisher
         {
             public static void useChannel(IModel model)
             {

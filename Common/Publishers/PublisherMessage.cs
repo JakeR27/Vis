@@ -1,9 +1,9 @@
 ﻿namespace Vis.Common
 {
-    partial class Publishers
+    public partial class Publishers
     {
         [Serializable]
-        class PublisherMessage
+        public class PublisherMessage
         {
             public string exchange;
             public string routingKey;

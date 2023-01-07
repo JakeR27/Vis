@@ -1,6 +1,6 @@
 ﻿namespace Vis.Common
 {
-    partial class Publishers
+    public partial class Publishers
     {
         public enum PublisherFailReason
         {
