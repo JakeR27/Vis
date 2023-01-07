@@ -1,6 +1,7 @@
 ﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
+using Vis.Common;
 
 namespace Vis.Server.Consumers
 {
@@ -28,7 +29,7 @@ namespace Vis.Server.Consumers
 
             // reply with organisation exchange name
             var message = Encoding.UTF8.GetBytes(ORG_XCH);
-            _channel.BasicPublish(
+            Publishers.SafePublisher.send(
                 exchange: Constants.DISCOVERY_XCH, 
                 routingKey: Constants.AUTH_RESPONSE_KEY(organisationId, unitId), 
                 body: message

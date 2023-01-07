@@ -17,6 +17,7 @@ namespace Vis.Server
 
             var connection = factory.CreateConnection();
             _channel = connection.CreateModel();
+            Vis.Common.Publishers.SafePublisher.useChannel(_channel);
 
             _channel.QueueDeclare(
                 queue: "backend-create",
