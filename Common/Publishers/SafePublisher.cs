@@ -34,6 +34,7 @@ namespace Vis.Common
                 {
                     DiskPublisher.send(exchange, routingKey, body);
                 }
+                Logs.Log(Logs.LogLevel.Info, $"Successfully sent message to {exchange} with key {routingKey}");
             }
         }
     }

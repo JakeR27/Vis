@@ -6,7 +6,7 @@ namespace Vis.Common
 {
     public abstract class BaseMessageConsumer
     {
-        public static LogLevel logLevel = LogLevel.Error;
+        public static LogLevel logLevel = LogLevel.Info;
         protected IModel _channel;
 
         public void Attach(IModel channel, string queue)
