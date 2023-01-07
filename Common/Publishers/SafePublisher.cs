@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RabbitMQ.Client;
+﻿using RabbitMQ.Client;
 using Vis.Common;
 
-namespace Server
+namespace Vis.Common
 {
-    internal partial class Publishers
+    partial class Publishers
     {
-        private static List<IModel> _channels;
-        static class SafePublisher
+        private static List<IModel> _channels = new ();
+        public static class SafePublisher
         {
             public static void useChannel(IModel model)
             {

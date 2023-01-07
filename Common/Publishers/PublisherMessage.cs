@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Server
+﻿namespace Vis.Common
 {
-    internal partial class Publishers
+    public partial class Publishers
     {
         [Serializable]
-        class PublisherMessage
+        public class PublisherMessage
         {
             public string exchange;
             public string routingKey;
