@@ -1,6 +1,6 @@
 ﻿using RabbitMQ.Client;
 
-namespace Server
+namespace Vis.Common
 {
     internal partial class Publishers
     {
