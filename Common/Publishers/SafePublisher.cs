@@ -3,7 +3,7 @@ using Vis.Common;
 
 namespace Vis.Common
 {
-    internal partial class Publishers
+    partial class Publishers
     {
         private static List<IModel> _channels;
         static class SafePublisher

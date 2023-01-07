@@ -2,7 +2,7 @@
 
 namespace Vis.Common
 {
-    internal partial class Publishers
+    partial class Publishers
     {
         static class DiskPublisher
         {
