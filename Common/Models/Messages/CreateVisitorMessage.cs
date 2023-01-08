@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Vis.Common.Models;
-
-namespace Common.Models.Messages
+﻿namespace Vis.Common.Models.Messages
 {
+    [Serializable]
     public class CreateVisitorMessage : BaseMessage
     {
         public Visitor Visitor = new();
