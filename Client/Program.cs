@@ -59,7 +59,7 @@ namespace Vis.Client
                 RoutingKey = "10.create"
             };
 
-            Console.WriteLine(Encoding.UTF8.GetString(Vis.Common.Models.Serializer.Serialize(temp)));
+           // Console.WriteLine(Encoding.UTF8.GetString(Vis.Common.Models.Serializer.Serialize(temp)));
 
             Publishers.SafePublisher.sendMessage(temp);
             //Publishers.SafePublisher.send(exchange: ClientData._organisationExchangeName, routingKey: $"{ClientData._organisationId}.create", body: Serializer.Serialize(temp));
