@@ -3,6 +3,8 @@ using RabbitMQ.Client.Events;
 using System.Text;
 using Vis.Client.Consumers;
 using Vis.Common;
+using Vis.Common.Models;
+using Vis.Common.Models.Messages;
 
 namespace Vis.Client
 {
@@ -39,7 +41,11 @@ namespace Vis.Client
             
             new AuthConsumer().Attach(_channel, authQueue);
 
-            Publishers.SafePublisher.send(exchange: Constants.DISCOVERY_XCH, routingKey: authRequestsRoutingKey, body: Encoding.UTF8.GetBytes("CREATE MESSAGE"));
+            var authRequest =
+                new Common.Models.Messages.AuthRequestMessage(ClientData._organisationId, ClientData._unitId, "SECRET");
+
+            Publishers.SafePublisher.sendMessage(authRequest);
+            //Publishers.SafePublisher.send(exchange: Constants.DISCOVERY_XCH, routingKey: authRequestsRoutingKey, body: Encoding.UTF8.GetBytes("CREATE MESSAGE"));
 
             while (!ClientData._organisationExchangeFound) { } //wait
 
@@ -48,7 +54,22 @@ namespace Vis.Client
             _channel.QueueBind(queue: inQueue,     exchange: ClientData._organisationExchangeName, routingKey: "*.in");
             _channel.QueueBind(queue: outQueue,    exchange: ClientData._organisationExchangeName, routingKey: "*.out");
 
-            Publishers.SafePublisher.send(exchange: ClientData._organisationExchangeName, routingKey: $"{ClientData._organisationId}.create", body: Encoding.UTF8.GetBytes("CREATE message content"));
+            var temp = new CreateVisitorMessage
+            {
+                Visitor =
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "bob"
+                },
+                DestinationExchange = ClientData._organisationExchangeName,
+                RoutingKey = "10.create"
+            };
+
+            Console.WriteLine(Encoding.UTF8.GetString(Vis.Common.Models.Serializer.Serialize(temp)));
+
+            Publishers.SafePublisher.sendMessage(temp);
+            //Publishers.SafePublisher.send(exchange: ClientData._organisationExchangeName, routingKey: $"{ClientData._organisationId}.create", body: Serializer.Serialize(temp));
+            //Publishers.SafePublisher.send(exchange: ClientData._organisationExchangeName, routingKey: $"{ClientData._organisationId}.create", body: Encoding.UTF8.GetBytes("CREATE message content"));
             Publishers.SafePublisher.send(exchange: ClientData._organisationExchangeName, routingKey: $"{ClientData._organisationId}.in",     body: Encoding.UTF8.GetBytes("IN message content"));
             Publishers.SafePublisher.send(exchange: ClientData._organisationExchangeName, routingKey: $"{ClientData._organisationId}.out",    body: Encoding.UTF8.GetBytes("OUT message content"));
 
