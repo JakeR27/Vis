@@ -2,6 +2,7 @@
 using RabbitMQ.Client.Events;
 using System.Text;
 using Vis.Common;
+using Vis.Common.Models.Messages;
 
 namespace Vis.Server.Consumers
 {
@@ -9,10 +10,18 @@ namespace Vis.Server.Consumers
     {
         protected override void callback(object? model, BasicDeliverEventArgs args)
         {
+            AuthRequestMessage request = Common.Models.Serializer.Deserialize<AuthRequestMessage>(args.Body.ToArray());
             // parse routeing key
-            var routingKeyParts = args.RoutingKey.Split(".");
-            var organisationId = int.Parse(routingKeyParts[0]);
-            var unitId = int.Parse(routingKeyParts[1]);
+            var organisationId = request.OrganisationId;
+            var unitId = request.UnitId;
+
+            // LOG
+            var logMsg = $"AUTH request received for {request.OrganisationId}.{request.UnitId} with {request.Secret}";
+            Logs.Log(Logs.LogLevel.Info, logMsg);
+
+
+            // VALIDATE SECRET
+            // if (request.Secret == ...) { }
 
 
             // create and link exchange
@@ -28,12 +37,21 @@ namespace Vis.Server.Consumers
             );
 
             // reply with organisation exchange name
-            var message = Encoding.UTF8.GetBytes(ORG_XCH);
-            Publishers.SafePublisher.send(
-                exchange: Constants.DISCOVERY_XCH, 
-                routingKey: Constants.AUTH_RESPONSE_KEY(organisationId, unitId), 
-                body: message
-            );
+
+            var response = new Common.Models.Messages.AuthResponseMessage(organisationId, unitId)
+            {
+                Success = true,
+                OrganisationExchangeName = ORG_XCH
+            };
+
+            Publishers.SafePublisher.sendMessage(response);
+
+            //var message = Encoding.UTF8.GetBytes(ORG_XCH);
+            //Publishers.SafePublisher.send(
+            //    exchange: Constants.DISCOVERY_XCH, 
+            //    routingKey: Constants.AUTH_RESPONSE_KEY(organisationId, unitId), 
+            //    body: message
+            //);
         }
     }
 }
