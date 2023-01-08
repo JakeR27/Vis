@@ -1,5 +1,7 @@
 ﻿using RabbitMQ.Client;
 using Vis.Common;
+using Vis.Common.Models;
+using Vis.Common.Models.Messages;
 
 namespace Vis.Common
 {
@@ -35,6 +37,11 @@ namespace Vis.Common
                     DiskPublisher.send(exchange, routingKey, body);
                 }
                 Logs.Log(Logs.LogLevel.Info, $"Successfully sent message to {exchange} with key {routingKey}");
+            }
+
+            public static void sendMessage<T>(T message) where T : BaseMessage
+            {
+                send(exchange: message.DestinationExchange, routingKey: message.RoutingKey, body: Serializer.Serialize(message));
             }
         }
     }
