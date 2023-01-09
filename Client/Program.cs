@@ -45,8 +45,8 @@ namespace Vis.Client
 
             _channel.ExchangeDeclare(exchange: ClientData._organisationExchangeName, type: ExchangeType.Topic);
             _channel.QueueBind(queue: createQueue, exchange: ClientData._organisationExchangeName, routingKey: $"{ClientData._organisationId}.create");
-            _channel.QueueBind(queue: inQueue,     exchange: ClientData._organisationExchangeName, routingKey: $"{ClientData._organisationId}..in");
-            _channel.QueueBind(queue: outQueue,    exchange: ClientData._organisationExchangeName, routingKey: $"{ClientData._organisationId}..out");
+            _channel.QueueBind(queue: inQueue,     exchange: ClientData._organisationExchangeName, routingKey: $"{ClientData._organisationId}.in");
+            _channel.QueueBind(queue: outQueue,    exchange: ClientData._organisationExchangeName, routingKey: $"{ClientData._organisationId}.out");
 
             var temp = new CreateVisitorMessage
             {
