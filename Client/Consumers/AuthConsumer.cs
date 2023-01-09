@@ -2,6 +2,7 @@
 using RabbitMQ.Client.Events;
 using System.Text;
 using Vis.Common;
+using Vis.Common.Models.Messages;
 
 namespace Vis.Client.Consumers
 {
@@ -9,11 +10,12 @@ namespace Vis.Client.Consumers
     {
         protected override void callback(object? model, BasicDeliverEventArgs args)
         {
-            string msg = $"Received AUTH message {Constants.BODY_AS_TEXT(args.Body)}";
+            AuthResponseMessage response = Common.Models.Serializer.Deserialize<AuthResponseMessage>(args.Body.ToArray());
+            string msg = $"Received AUTH response, success: {response.Success}, organisation xch: {response.OrganisationExchangeName}";
             Logs.Log(Logs.LogLevel.Info, msg);
 
-            ClientData._organisationExchangeName = Constants.BODY_AS_TEXT(args.Body);
-            ClientData._organisationExchangeFound = true;
+            ClientData._organisationExchangeName = response.OrganisationExchangeName;
+            ClientData._organisationExchangeFound = response.Success;
         }
     }
 }

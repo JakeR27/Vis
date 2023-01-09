@@ -6,7 +6,6 @@ namespace Vis.Common
 {
     public abstract class BaseMessageConsumer
     {
-        public static LogLevel logLevel = LogLevel.Info;
         protected IModel _channel;
 
         public void Attach(IModel channel, string queue)
@@ -19,11 +18,7 @@ namespace Vis.Common
 
         private void _callback(object? model, BasicDeliverEventArgs args)
         {
-            if (logLevel >= LogLevel.Info)
-            {
-                _log(args);
-            }
-
+            _log(args);
             callback(model, args);
         }
 
@@ -31,13 +26,9 @@ namespace Vis.Common
 
         private static void _log(BasicDeliverEventArgs args)
         {
-            var message = String.Format(
-                "Received on {0} : {1}",
-                args.RoutingKey,
-                Encoding.UTF8.GetString(args.Body.ToArray())
-            );
+            var message = $"Received on {args.RoutingKey} : {Encoding.UTF8.GetString(args.Body.ToArray())}";
 
-            Log(LogLevel.Info, message);
+            Log(LogLevel.Debug, message);
         }
 
     }
