@@ -1,13 +1,19 @@
 ﻿using RabbitMQ.Client.Events;
-using static Vis.Common.Logs;
+using Vis.Common;
+using Vis.Common.Models.Messages;
 
 namespace Vis.Server.Consumers
 {
-    internal class OutConsumer : Common.BaseMessageConsumer
+    internal class OutConsumer : Vis.Common.BaseMessageConsumer
     {
         protected override void callback(object? model, BasicDeliverEventArgs args)
         {
-            Log(LogLevel.Info, Constants.BODY_AS_TEXT(args.Body));
+            OutVisitorMessage request = Common.Models.Serializer.Deserialize<OutVisitorMessage>(args.Body.ToArray());
+
+            ServerData.visitorsStatus[request.VisitorId] = false;
+
+            string msg = $"IN for visitor: {request.VisitorId}";
+            Logs.Log(Logs.LogLevel.Info, msg);
         }
     }
 }

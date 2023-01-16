@@ -2,6 +2,7 @@
 using RabbitMQ.Client.Events;
 using System.Text;
 using Vis.Server.Consumers;
+using Vis.Server.Endpoints;
 
 namespace Vis.Server
 {
@@ -84,6 +85,9 @@ namespace Vis.Server
             new OutConsumer().Attach(_channel, "backend-out");
             new HostConsumer().Attach(_channel, "backend-requests-host");
             new AuthConsumer().Attach(_channel, "backend-requests-auth");
+            new GetVisitors("/visitors").handle();
+            Vis.WebServer.App.WebApp.Urls.Add("http://*:5000");
+            Vis.WebServer.App.WebApp.RunAsync();
 
             Console.WriteLine("Listening for messages, press [Enter] to exit");
             Console.ReadLine();

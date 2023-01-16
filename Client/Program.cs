@@ -22,6 +22,9 @@ namespace Vis.Client
             _channel = connection.CreateModel();
             Vis.Common.Publishers.SafePublisher.useChannel(_channel);
 
+            Console.WriteLine("Enter unit id");
+            ClientData._unitId = int.Parse(Console.ReadLine());
+
         
             var createQueue = _channel.QueueDeclare().QueueName;
             var inQueue = _channel.QueueDeclare().QueueName;
@@ -34,12 +37,18 @@ namespace Vis.Client
             _channel.QueueBind(queue: authQueue, exchange: Constants.DISCOVERY_XCH, routingKey: Constants.AUTH_RESPONSE_KEY(ClientData._organisationId, ClientData._unitId));
             
             new AuthConsumer().Attach(_channel, authQueue);
+            new HostConsumer().Attach(_channel, hostQueue);
+            new CreateConsumer().Attach(_channel, createQueue);
+            new InConsumer().Attach(_channel, inQueue);
+            new OutConsumer().Attach(_channel, outQueue);
 
-            var authRequest =
-                new Common.Models.Messages.AuthRequestMessage(ClientData._organisationId, ClientData._unitId, "SECRET");
+            
+
+            var authRequest = new AuthRequestMessage(ClientData._organisationId, ClientData._unitId, "SECRET");
+            var hostRequest = new HostRequestMessage(ClientData._organisationId, ClientData._unitId);
 
             Publishers.SafePublisher.sendMessage(authRequest);
-            //Publishers.SafePublisher.send(exchange: Constants.DISCOVERY_XCH, routingKey: authRequestsRoutingKey, body: Encoding.UTF8.GetBytes("CREATE MESSAGE"));
+            Publishers.SafePublisher.sendMessage(hostRequest);
 
             while (!ClientData._organisationExchangeFound) { } //wait
 
@@ -48,24 +57,54 @@ namespace Vis.Client
             _channel.QueueBind(queue: inQueue,     exchange: ClientData._organisationExchangeName, routingKey: $"{ClientData._organisationId}.in");
             _channel.QueueBind(queue: outQueue,    exchange: ClientData._organisationExchangeName, routingKey: $"{ClientData._organisationId}.out");
 
-            var temp = new CreateVisitorMessage
+           
+            while (!ClientData._serverHostFound) { } // wait
+            ClientData.displayVisitors();
+
+            var running = true;
+            while (running)
             {
-                Visitor =
+                Console.WriteLine("enter a name");
+                var input = Console.ReadLine();
+
+                if (input is "q" or "quit") {running = false; continue;}
+
+                switch (input[0])
                 {
-                    Id = Guid.NewGuid(),
-                    Name = "bob"
-                },
-                DestinationExchange = ClientData._organisationExchangeName,
-                RoutingKey = "10.create"
-            };
+                    case 'c':
+                        Publishers.SafePublisher.sendMessage(new CreateVisitorMessage()
+                        {
+                            Visitor =
+                            {
+                                Id = Guid.NewGuid(),
+                                Name = input[2..]
+                            },
+                            DestinationExchange = ClientData._organisationExchangeName,
+                            RoutingKey = "10.create"
+                        });
+                        break;
+                    case 'i':
+                        Publishers.SafePublisher.sendMessage(new InVisitorMessage()
+                        {
+                            VisitorId = ClientData.visitors.Values.ToList()[int.Parse(input[2].ToString())].Id,
+                            Time = DateTime.Now,
+                            DestinationExchange = ClientData._organisationExchangeName,
+                            RoutingKey = "10.in"
+                        });
+                        break;
+                    case 'o':
+                        Publishers.SafePublisher.sendMessage(new OutVisitorMessage()
+                        {
+                            VisitorId = ClientData.visitors.Values.ToList()[int.Parse(input[2].ToString())].Id,
+                            Time = DateTime.Now,
+                            DestinationExchange = ClientData._organisationExchangeName,
+                            RoutingKey = "10.out"
+                        });
+                        break;
+                }
 
-           // Console.WriteLine(Encoding.UTF8.GetString(Vis.Common.Models.Serializer.Serialize(temp)));
-
-            Publishers.SafePublisher.sendMessage(temp);
-            //Publishers.SafePublisher.send(exchange: ClientData._organisationExchangeName, routingKey: $"{ClientData._organisationId}.create", body: Serializer.Serialize(temp));
-            //Publishers.SafePublisher.send(exchange: ClientData._organisationExchangeName, routingKey: $"{ClientData._organisationId}.create", body: Encoding.UTF8.GetBytes("CREATE message content"));
-            Publishers.SafePublisher.send(exchange: ClientData._organisationExchangeName, routingKey: $"{ClientData._organisationId}.in",     body: Encoding.UTF8.GetBytes("IN message content"));
-            Publishers.SafePublisher.send(exchange: ClientData._organisationExchangeName, routingKey: $"{ClientData._organisationId}.out",    body: Encoding.UTF8.GetBytes("OUT message content"));
+                
+            }
 
         }
     }

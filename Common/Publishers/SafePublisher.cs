@@ -35,6 +35,7 @@ namespace Vis.Common
                 if (!successful)
                 {
                     DiskPublisher.send(exchange, routingKey, body);
+                    Logs.Log(Logs.LogLevel.Warning, $"Message to {exchange} with key {routingKey} has been saved to disk");
                 }
                 Logs.Log(Logs.LogLevel.Info, $"Successfully sent message to {exchange} with key {routingKey}");
             }
