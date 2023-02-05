@@ -29,7 +29,7 @@ namespace Vis.Client
             {
                 ClientData.visitorsStatus.TryGetValue(visitorEntry.Key, out var status);
 
-                Console.WriteLine($"{i}. {visitorEntry.Value.Id.ToString("N")[..5]} - {(status ? "IN" : "OUT")} - {visitorEntry.Value.Name}");
+                Console.WriteLine($"{i}. {visitorEntry.Value.Guid.ToString("N")[..5]} - {(status ? "IN" : "OUT")} - {visitorEntry.Value.Name}");
                 i++;
             }
         }

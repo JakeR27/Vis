@@ -1,7 +1,11 @@
 ﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
+using MongoDB.Driver;
+using Vis.Common;
+using Vis.Common.Models;
 using Vis.Server.Consumers;
+using Vis.Server.Database;
 using Vis.Server.Endpoints;
 
 namespace Vis.Server
@@ -68,7 +72,7 @@ namespace Vis.Server
                 routingKey: "*.out"
             );
 
-            _channel.ExchangeDeclare(exchange: "discovery-xch", type: ExchangeType.Topic);
+            _channel.ExchangeDeclare(exchange: Constants.DISCOVERY_XCH, type: ExchangeType.Topic);
             _channel.QueueBind(
                 queue: "backend-requests-host", 
                 exchange: Constants.DISCOVERY_XCH,
@@ -88,6 +92,16 @@ namespace Vis.Server
             new GetVisitors("/visitors").handle();
             Vis.WebServer.App.WebApp.Urls.Add("http://*:5000");
             Vis.WebServer.App.WebApp.RunAsync();
+
+
+            var database = Dbo.Instance.Database;
+            var visitors = database.GetCollection<Server.Models.Visitor>("people").Find(_ => true).ToList();
+            foreach (var visitor in visitors)
+            {
+                ServerData.visitors.Add(visitor.Guid, visitor);
+                Logs.Log(Logs.LogLevel.Debug, visitor.Name);
+            }
+
 
             Console.WriteLine("Listening for messages, press [Enter] to exit");
             Console.ReadLine();

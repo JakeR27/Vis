@@ -76,7 +76,7 @@ namespace Vis.Client
                         {
                             Visitor =
                             {
-                                Id = Guid.NewGuid(),
+                                Guid = Guid.NewGuid(),
                                 Name = input[2..]
                             },
                             DestinationExchange = ClientData._organisationExchangeName,
@@ -86,7 +86,7 @@ namespace Vis.Client
                     case 'i':
                         Publishers.SafePublisher.sendMessage(new InVisitorMessage()
                         {
-                            VisitorId = ClientData.visitors.Values.ToList()[int.Parse(input[2].ToString())].Id,
+                            VisitorId = ClientData.visitors.Values.ToList()[int.Parse(input[2].ToString())].Guid,
                             Time = DateTime.Now,
                             DestinationExchange = ClientData._organisationExchangeName,
                             RoutingKey = "10.in"
@@ -95,7 +95,7 @@ namespace Vis.Client
                     case 'o':
                         Publishers.SafePublisher.sendMessage(new OutVisitorMessage()
                         {
-                            VisitorId = ClientData.visitors.Values.ToList()[int.Parse(input[2].ToString())].Id,
+                            VisitorId = ClientData.visitors.Values.ToList()[int.Parse(input[2].ToString())].Guid,
                             Time = DateTime.Now,
                             DestinationExchange = ClientData._organisationExchangeName,
                             RoutingKey = "10.out"

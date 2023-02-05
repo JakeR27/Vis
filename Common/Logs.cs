@@ -9,7 +9,7 @@ namespace Vis.Common
     public static class Logs
     {
         private static string[] _logLevelStrings = { "DBG", "INF", "WRN", "ERR" };
-        private static LogLevel _logLevel = LogLevel.Info;
+        private static LogLevel _logLevel = LogLevel.Debug;
 
         public enum LogLevel
         {

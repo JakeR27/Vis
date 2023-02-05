@@ -23,8 +23,8 @@ namespace Vis.Client.Consumers
 
             foreach (var visitorResult in parsedData)
             {
-                ClientData.visitors[visitorResult.Visitor.Id] = visitorResult.Visitor;
-                ClientData.visitorsStatus[visitorResult.Visitor.Id] = visitorResult.status;
+                ClientData.visitors[visitorResult.Visitor.Guid] = visitorResult.Visitor;
+                ClientData.visitorsStatus[visitorResult.Visitor.Guid] = visitorResult.status;
             }
 
             ClientData._serverHostFound = true;
