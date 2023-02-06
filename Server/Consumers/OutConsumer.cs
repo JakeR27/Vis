@@ -12,7 +12,7 @@ namespace Vis.Server.Consumers
 
             ServerData.visitorsStatus[request.VisitorId] = false;
 
-            string msg = $"IN for visitor: {request.VisitorId}";
+            string msg = $"OUT for visitor: {request.VisitorId}";
             Logs.Log(Logs.LogLevel.Info, msg);
         }
     }
