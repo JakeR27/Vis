@@ -15,9 +15,9 @@ namespace Vis.Client.Consumers
             string msg = $"Received CREATE message: {message.Visitor.Name}, id({message.Visitor.Guid})";
             Logs.Log(Logs.LogLevel.Info, msg);
 
-            ClientData.visitors.Add(message.Visitor.Guid, message.Visitor);
+            ClientState.visitors.Add(message.Visitor.Guid, message.Visitor);
             
-            ClientData.displayVisitors();
+            ClientState.displayVisitors();
         }
     }
 }

@@ -23,4 +23,10 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="server-app.pfx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

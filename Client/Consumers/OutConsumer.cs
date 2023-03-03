@@ -15,9 +15,9 @@ namespace Vis.Client.Consumers
             string msg = $"Received OUT message: {message.VisitorId}";
             Logs.Log(Logs.LogLevel.Info, msg);
 
-            ClientData.visitorsStatus[message.VisitorId] = false;
+            ClientState.visitorsStatus[message.VisitorId] = false;
 
-            ClientData.displayVisitors();
+            ClientState.displayVisitors();
         }
     }
 }

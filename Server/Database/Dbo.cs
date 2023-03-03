@@ -21,6 +21,23 @@ public class Dbo
     public MongoClient Client => _client;
     public IMongoDatabase Database => Client.GetDatabase("vis-data");
 
+    public IMongoCollection<TCollection> GetCollection<TCollection>(string collectionName) =>
+        Database.GetCollection<TCollection>(collectionName);
+    
+    public void InsertOne<TDocument>(string collectionName, TDocument document) {
+        Logs.LogDebug("Creating MongoDB session");
+        using (var session = Dbo.Instance.Client.StartSession())
+        {
+            session.StartTransaction();
+            Logs.LogDebug($"MongoDB transaction on .{collectionName} with {document?.GetType().Name}");
+            
+            GetCollection<TDocument>("events").InsertOne(document);
+            
+            session.CommitTransaction();
+            Logs.LogDebug("MongoDB transaction committed successfully");
+        }
+    }
+
     private Dbo()
     {
         _client = DbConnect.Connect();

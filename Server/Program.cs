@@ -84,10 +84,19 @@ namespace Vis.Server
                 routingKey: "*.*.requests.auth"
             );
 
+            var attachHost = Environment.GetEnvironmentVariable("VIS_HANDLE_HOST_REQUESTS");
+
             new CreateConsumer().Attach(_channel, "backend-create");
             new InConsumer().Attach(_channel, "backend-in");
             new OutConsumer().Attach(_channel, "backend-out");
-            new HostConsumer().Attach(_channel, "backend-requests-host");
+
+            // if environment variable set to TRUE (or not set default to TRUE)
+            if (attachHost?.Equals("true") ?? true)
+            {
+                Logs.LogInfo("Attached host consumer - responding to host requests");
+                new HostConsumer().Attach(_channel, "backend-requests-host");
+            }
+            
             new AuthConsumer().Attach(_channel, "backend-requests-auth");
             new GetVisitors("/visitors").handle();
             Vis.WebServer.App.WebApp.Urls.Add("http://*:5000");
@@ -96,6 +105,9 @@ namespace Vis.Server
 
             var database = Dbo.Instance.Database;
             var visitors = database.GetCollection<Server.Models.Visitor>("people").Find(_ => true).ToList();
+            
+            //TODO - INIT VISITOR STATUS FROM EVENT COLLECTION
+            
             foreach (var visitor in visitors)
             {
                 ServerData.visitors.Add(visitor.Guid, visitor);

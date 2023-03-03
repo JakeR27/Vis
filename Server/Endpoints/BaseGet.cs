@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Vis.Common;
 
 namespace Vis.Server.Endpoints
 {
@@ -20,6 +21,13 @@ namespace Vis.Server.Endpoints
         {
             Vis.WebServer.App.WebApp.MapGet(_path, _callback);
         }
-        protected abstract IResult _callback(HttpContext context);
+
+        private IResult _callback(HttpContext context)
+        {
+            Logs.LogDebug($"Received HTTP GET request on {_path}");
+            return callback(context);
+        }
+
+        protected abstract IResult callback(HttpContext context);
     }
 }

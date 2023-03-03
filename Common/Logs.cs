@@ -19,8 +19,14 @@ namespace Vis.Common
             Error = 3,
         }
 
+        public static void LogDebug(string message) => Log(LogLevel.Debug, message);
+        public static void LogInfo(string message) => Log(LogLevel.Info, message);
+        public static void LogWarning(string message) => Log(LogLevel.Warning, message);
+        public static void LogError(string message) => Log(LogLevel.Error, message);
+
         public static void Log(LogLevel level, string message)
         {
+            //return;
             if (level < _logLevel) return;
 
             string time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");

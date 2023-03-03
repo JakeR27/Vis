@@ -1,6 +1,8 @@
 ﻿using RabbitMQ.Client.Events;
 using Vis.Common;
 using Vis.Common.Models.Messages;
+using Vis.Server.Database;
+using Vis.Server.Models;
 
 namespace Vis.Server.Consumers
 {
@@ -10,6 +12,15 @@ namespace Vis.Server.Consumers
         {
             OutVisitorMessage request = Common.Models.Serializer.Deserialize<OutVisitorMessage>(args.Body.ToArray());
 
+            var visitorEvent = new VisitorEvent()
+            {
+                VisitorId = request.VisitorId,
+                EventType = VisitorEventEnum.Out,
+                Timestamp = request.Time
+            };
+
+            Dbo.Instance.InsertOne("events", visitorEvent);
+            
             ServerData.visitorsStatus[request.VisitorId] = false;
 
             string msg = $"OUT for visitor: {request.VisitorId}";

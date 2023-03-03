@@ -15,9 +15,9 @@ namespace Vis.Client.Consumers
             string msg = $"Received IN message: {message.VisitorId}";
             Logs.Log(Logs.LogLevel.Info, msg);
 
-            ClientData.visitorsStatus[message.VisitorId] = true;
+            ClientState.visitorsStatus[message.VisitorId] = true;
 
-            ClientData.displayVisitors();
+            ClientState.displayVisitors();
         }
     }
 }

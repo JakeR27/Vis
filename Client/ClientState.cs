@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Vis.Common.Models;
+﻿using Vis.Common.Models;
 
 namespace Vis.Client
 {
-    internal static class ClientData
+    public static class ClientState
     {
         public static int _organisationId = 10;
         public static int _unitId = 1;
@@ -23,11 +18,11 @@ namespace Vis.Client
         //very temp
         public static void displayVisitors()
         {
-            Console.Clear();
+            //Console.Clear();
             int i = 0;
-            foreach (var visitorEntry in ClientData.visitors)
+            foreach (var visitorEntry in ClientState.visitors)
             {
-                ClientData.visitorsStatus.TryGetValue(visitorEntry.Key, out var status);
+                ClientState.visitorsStatus.TryGetValue(visitorEntry.Key, out var status);
 
                 Console.WriteLine($"{i}. {visitorEntry.Value.Guid.ToString("N")[..5]} - {(status ? "IN" : "OUT")} - {visitorEntry.Value.Name}");
                 i++;

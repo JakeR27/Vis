@@ -1,6 +1,8 @@
 ﻿using RabbitMQ.Client.Events;
 using Vis.Common;
 using Vis.Common.Models.Messages;
+using Vis.Server.Database;
+using Vis.Server.Models;
 
 namespace Vis.Server.Consumers
 {
@@ -8,7 +10,25 @@ namespace Vis.Server.Consumers
     {
         protected override void callback(object? model, BasicDeliverEventArgs args)
         {
-            InVisitorMessage request = Common.Models.Serializer.Deserialize<InVisitorMessage>(args.Body.ToArray());
+            var request = Common.Models.Serializer.Deserialize<InVisitorMessage>(args.Body.ToArray());
+
+            var visitorEvent = new VisitorEvent()
+            {
+                VisitorId = request.VisitorId,
+                EventType = VisitorEventEnum.In,
+                Timestamp = request.Time
+            };
+
+            using (var session = Dbo.Instance.Client.StartSession())
+            {
+                Logs.LogDebug("Attempting to start MongoDB transaction");
+                session.StartTransaction();
+                Dbo.Instance.GetCollection<VisitorEvent>("events").InsertOne(visitorEvent);
+                session.CommitTransaction();
+                Logs.LogDebug("MongoDB transaction committed successfully");
+            }
+           
+            
 
             ServerData.visitorsStatus[request.VisitorId] = true;
 
