@@ -2,11 +2,12 @@
 using RabbitMQ.Client.Events;
 using System.Text;
 using Vis.Common;
+using Vis.Common.Consumers;
 using Vis.Common.Models.Messages;
 
 namespace Vis.Server.Consumers
 {
-    internal class AuthConsumer : Common.BaseMessageConsumer
+    internal class AuthConsumer : BaseMessageConsumer
     {
         protected override void callback(object? model, BasicDeliverEventArgs args)
         {

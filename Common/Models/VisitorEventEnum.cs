@@ -1,4 +1,4 @@
-﻿namespace Vis.Server.Models;
+﻿namespace Vis.Common.Models;
 
 public enum VisitorEventEnum
 {

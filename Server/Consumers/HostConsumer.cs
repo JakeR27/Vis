@@ -1,5 +1,6 @@
 ﻿using RabbitMQ.Client.Events;
 using Vis.Common;
+using Vis.Common.Consumers;
 using Vis.Common.Models;
 using Vis.Common.Models.Messages;
 using static Vis.Common.Logs;

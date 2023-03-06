@@ -1,4 +1,6 @@
 ﻿using RabbitMQ.Client;
+using Vis.Common.Models;
+using Vis.Common.Models.Messages;
 
 namespace Vis.Common
 {
@@ -18,6 +20,7 @@ namespace Vis.Common
                     bw.Write(message.Serialize());
                 }
             }
+
         }
     }
 }

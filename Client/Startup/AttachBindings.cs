@@ -3,6 +3,7 @@ using Vis.Client.Consumers;
 using Vis.Client.Startup;
 using Vis.Common;
 using Vis.Common.Models.Messages;
+using Vis.Common.Startup;
 using Constants = Vis.Constants;
 
 namespace Vis.Client.Startup;

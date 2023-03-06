@@ -29,7 +29,7 @@ namespace Vis.Common
             //return;
             if (level < _logLevel) return;
 
-            string time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+            string time = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff");
             Console.WriteLine(
                 "[{0}][{1}] {2}", 
                 time, 

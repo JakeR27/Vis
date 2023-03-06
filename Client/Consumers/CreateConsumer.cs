@@ -3,6 +3,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
 using Vis.Common;
+using Vis.Common.Consumers;
 using Vis.Common.Models.Messages;
 
 namespace Vis.Client.Consumers

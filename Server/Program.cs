@@ -90,7 +90,7 @@ namespace Vis.Server
             new InConsumer().Attach(_channel, "backend-in");
             new OutConsumer().Attach(_channel, "backend-out");
 
-            // if environment variable set to TRUE (or not set default to TRUE)
+            // if environment variable set to TRUE (or if not set then default to TRUE)
             if (attachHost?.Equals("true") ?? true)
             {
                 Logs.LogInfo("Attached host consumer - responding to host requests");
@@ -105,6 +105,8 @@ namespace Vis.Server
 
             var database = Dbo.Instance.Database;
             var visitors = database.GetCollection<Server.Models.Visitor>("people").Find(_ => true).ToList();
+
+            new Startup.VisitorStateParser().Execute();
             
             //TODO - INIT VISITOR STATUS FROM EVENT COLLECTION
             

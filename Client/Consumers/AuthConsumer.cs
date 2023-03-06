@@ -1,7 +1,9 @@
 ﻿using RabbitMQ.Client.Events;
 using Vis.Client.Startup;
 using Vis.Common;
+using Vis.Common.Consumers;
 using Vis.Common.Models.Messages;
+using Vis.Common.Startup;
 
 namespace Vis.Client.Consumers
 {

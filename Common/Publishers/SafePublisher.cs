@@ -29,6 +29,7 @@ namespace Vis.Common
                     catch (Exception ex)
                     {
                         Logs.Log(Logs.LogLevel.Warning, $"Failed to send message on channel {i}");
+                        Logs.LogDebug(ex.ToString());
                     }
                 }
 

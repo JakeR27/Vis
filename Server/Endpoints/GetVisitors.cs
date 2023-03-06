@@ -8,6 +8,7 @@ using MongoDB.Driver;
 using Vis.Common;
 using Vis.Common.Models.Results;
 using Vis.Server.Database;
+using Vis.Server.Startup;
 
 namespace Vis.Server.Endpoints
 {
@@ -21,6 +22,7 @@ namespace Vis.Server.Endpoints
             var data = new List<Common.Models.Results.VisitorResult>();
 
             var visitors = Dbo.Instance.Database.GetCollection<Server.Models.Visitor>("people").Find(_ => true).ToList();
+            new VisitorStateParser().Execute();
 
             foreach (var visitor in visitors)
             {

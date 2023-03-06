@@ -3,6 +3,6 @@
     public class VisitorResult
     {
         public Visitor Visitor;
-        public bool status;
+        public VisitorEventEnum status;
     }
 }

@@ -13,9 +13,10 @@ namespace Vis.Client
 
         //temp
         public static Dictionary<Guid, Visitor> visitors = new();
-        public static Dictionary<Guid, bool> visitorsStatus = new();
+        public static Dictionary<Guid, VisitorEventEnum> visitorsStatus = new();
 
         //very temp
+        [Obsolete]
         public static void displayVisitors()
         {
             //Console.Clear();
@@ -24,7 +25,7 @@ namespace Vis.Client
             {
                 ClientState.visitorsStatus.TryGetValue(visitorEntry.Key, out var status);
 
-                Console.WriteLine($"{i}. {visitorEntry.Value.Guid.ToString("N")[..5]} - {(status ? "IN" : "OUT")} - {visitorEntry.Value.Name}");
+                Console.WriteLine($"{i}. {visitorEntry.Value.Guid.ToString("N")[..5]} - {status} - {visitorEntry.Value.Name}");
                 i++;
             }
         }

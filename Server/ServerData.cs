@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Vis.Common.Models;
+using Vis.Server.Models;
+using Visitor = Vis.Common.Models.Visitor;
 
 namespace Vis.Server
 {
@@ -11,6 +13,6 @@ namespace Vis.Server
     {
         //temp
         public static Dictionary<Guid, Visitor> visitors = new();
-        public static Dictionary<Guid, bool> visitorsStatus = new();
+        public static Dictionary<Guid, VisitorEventEnum> visitorsStatus = new();
     }
 }

@@ -94,8 +94,8 @@ namespace Vis.Client
                     case 'i':
                         Publishers.SafePublisher.sendMessage(new InVisitorMessage()
                         {
-                            VisitorId = ClientState.visitors.Values.ToList()[int.Parse(input[2].ToString())].Guid,
-                            Time = DateTime.Now,
+                            VisitorId = ClientState.visitors.Values.ToList()[int.Parse(input[2..].ToString())].Guid,
+                            Time = DateTime.UtcNow,
                             DestinationExchange = ClientState._organisationExchangeName,
                             RoutingKey = "10.in"
                         });
@@ -103,8 +103,8 @@ namespace Vis.Client
                     case 'o':
                         Publishers.SafePublisher.sendMessage(new OutVisitorMessage()
                         {
-                            VisitorId = ClientState.visitors.Values.ToList()[int.Parse(input[2].ToString())].Guid,
-                            Time = DateTime.Now,
+                            VisitorId = ClientState.visitors.Values.ToList()[int.Parse(input[2..].ToString())].Guid,
+                            Time = DateTime.UtcNow,
                             DestinationExchange = ClientState._organisationExchangeName,
                             RoutingKey = "10.out"
                         });
