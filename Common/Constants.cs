@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Vis
+namespace Vis.Common
 {
     public static class Constants
     {

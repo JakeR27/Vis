@@ -3,6 +3,7 @@ using RabbitMQ.Client.Events;
 using System.Text;
 using Vis.Client.Consumers;
 using Vis.Common;
+using Vis.Common.Configuration;
 using Vis.Common.Models;
 using Vis.Common.Models.Messages;
 
@@ -59,6 +60,15 @@ namespace Vis.Client
             // ClientData.displayVisitors();
             //
             Logs.Log(Logs.LogLevel.Debug, "Beginning startup");
+
+            var unitIdEnv = new IntegerConfigurationItem("VIS_UNIT_ID", 10);
+            var orgIdEnv = new IntegerConfigurationItem("VIS_ORGANISATION_ID", 1);
+            var orgSecEnv = new StringConfigurationItem("VIS_ORGANISATION_SECRET", "DEADBEEF");
+
+            ClientState._unitId = unitIdEnv.Value();
+            ClientState._organisationId = orgIdEnv.Value();
+            ClientState._organisationSecret = orgSecEnv.Value();
+            
             Vis.Client.Startup.AttachBindings.Begin();
             
             Logs.Log(Logs.LogLevel.Debug, "Waiting for startup to complete");
@@ -85,10 +95,11 @@ namespace Vis.Client
                             Visitor =
                             {
                                 Guid = Guid.NewGuid(),
+                                OrganisationId = ClientState._organisationId,
                                 Name = input[2..]
                             },
                             DestinationExchange = ClientState._organisationExchangeName,
-                            RoutingKey = "10.create"
+                            RoutingKey = $"{ClientState._organisationId}.create"
                         });
                         break;
                     case 'i':
@@ -97,7 +108,7 @@ namespace Vis.Client
                             VisitorId = ClientState.visitors.Values.ToList()[int.Parse(input[2..].ToString())].Guid,
                             Time = DateTime.UtcNow,
                             DestinationExchange = ClientState._organisationExchangeName,
-                            RoutingKey = "10.in"
+                            RoutingKey = $"{ClientState._organisationId}.in"
                         });
                         break;
                     case 'o':
@@ -106,8 +117,11 @@ namespace Vis.Client
                             VisitorId = ClientState.visitors.Values.ToList()[int.Parse(input[2..].ToString())].Guid,
                             Time = DateTime.UtcNow,
                             DestinationExchange = ClientState._organisationExchangeName,
-                            RoutingKey = "10.out"
+                            RoutingKey = $"{ClientState._organisationId}.out"
                         });
+                        break;
+                    case 'q':
+                        Environment.Exit(0);
                         break;
                 }
 

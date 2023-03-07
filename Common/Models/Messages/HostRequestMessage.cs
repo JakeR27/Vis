@@ -10,7 +10,7 @@
         public HostRequestMessage(int organisationId, int unitId)
         {
             DestinationExchange = Constants.DISCOVERY_XCH;
-            RoutingKey = Vis.Constants.HOST_REQUEST_KEY(organisationId, unitId);
+            RoutingKey = Vis.Common.Constants.HOST_REQUEST_KEY(organisationId, unitId);
             OrganisationId = organisationId;
             UnitId = unitId;
         }

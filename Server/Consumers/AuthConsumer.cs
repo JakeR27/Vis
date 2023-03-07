@@ -1,9 +1,12 @@
 ﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
+using MongoDB.Driver;
 using Vis.Common;
 using Vis.Common.Consumers;
 using Vis.Common.Models.Messages;
+using Vis.Server.Database;
+using Vis.Server.Models;
 
 namespace Vis.Server.Consumers
 {
@@ -15,6 +18,7 @@ namespace Vis.Server.Consumers
             // parse routeing key
             var organisationId = request.OrganisationId;
             var unitId = request.UnitId;
+            var ORG_XCH = Vis.Constants.ORGANISATION_XCH(organisationId);
 
             // LOG
             var logMsg = $"AUTH request received for {request.OrganisationId}.{request.UnitId} with {request.Secret}";
@@ -22,11 +26,25 @@ namespace Vis.Server.Consumers
 
 
             // VALIDATE SECRET
-            // if (request.Secret == ...) { }
+            var requiredSecret = Dbo.Instance
+                .GetCollection<OrganisationSecret>("secrets")
+                .Find(secret => secret.OrganisationId == organisationId)
+                .First();
+
+            if (request.Secret == string.Empty || request.Secret != requiredSecret.Value)
+            {
+                Logs.LogInfo($"Auth check failed for {organisationId}.{unitId}");
+                Logs.LogDebug($"{request.Secret} did not match {requiredSecret.Value}");
+                Publishers.SafePublisher.sendMessage(new AuthResponseMessage(organisationId, unitId)
+                {
+                    Success = false,
+                    OrganisationExchangeName = ORG_XCH
+                });
+                return;
+            }
 
 
             // create and link exchange
-            var ORG_XCH = Vis.Constants.ORGANISATION_XCH(organisationId);
             _channel.ExchangeDeclare(
                 exchange: ORG_XCH, 
                 type: ExchangeType.Topic

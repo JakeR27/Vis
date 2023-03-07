@@ -8,6 +8,7 @@ namespace Vis.Client
         public static int _unitId = 1;
         public static bool _organisationExchangeFound = false;
         public static string _organisationExchangeName = string.Empty;
+        public static string _organisationSecret = string.Empty;
 
         public static bool _serverHostFound = false;
 

@@ -28,6 +28,10 @@ public class AttachBindings
         _bindDiscoveryQueues(channel);
         _attachDiscoveryConsumers(channel);
         _sendDiscoveryMessages();
+
+        // wait for auth to complete before trying to send further messages
+        while (AuthState != State.COMPLETE) { }
+
         _bindOperationalQueues(channel);
         _attachOperationalConsumers(channel);
         _sendHostMessages();
@@ -45,8 +49,8 @@ public class AttachBindings
         channel.ExchangeDeclare(exchange: Constants.DISCOVERY_XCH, type: ExchangeType.Topic);
         
         //TODO: make these use program data to define organisation and unit IDs
-        channel.QueueBind(queue: _hostQ, exchange: Constants.DISCOVERY_XCH, routingKey: Constants.HOST_RESPONSE_KEY(10, 1));
-        channel.QueueBind(queue: _authQ, exchange: Constants.DISCOVERY_XCH, routingKey: Constants.AUTH_RESPONSE_KEY(10, 1));
+        channel.QueueBind(queue: _hostQ, exchange: Constants.DISCOVERY_XCH, routingKey: Constants.HOST_RESPONSE_KEY(ClientState._organisationId, ClientState._unitId));
+        channel.QueueBind(queue: _authQ, exchange: Constants.DISCOVERY_XCH, routingKey: Constants.AUTH_RESPONSE_KEY(ClientState._organisationId, ClientState._unitId));
     }
 
     private static void _attachDiscoveryConsumers(IModel channel)
@@ -59,8 +63,7 @@ public class AttachBindings
     {
         AuthState = State.WAITING;
         
-        //TODO: replace with specific client data
-        var authRequest = new AuthRequestMessage(10, 1, "SECRET");
+        var authRequest = new AuthRequestMessage(ClientState._organisationId, ClientState._unitId, ClientState._organisationSecret);
         Publishers.SafePublisher.sendMessage(authRequest);
     }
 
@@ -70,13 +73,13 @@ public class AttachBindings
         _inQ = channel.QueueDeclare();
         _outQ= channel.QueueDeclare();
         
-        channel.ExchangeDeclare(exchange: Constants.ORGANISATION_XCH(10), type: ExchangeType.Topic);
+        channel.ExchangeDeclare(exchange: ClientState._organisationExchangeName, type: ExchangeType.Topic);
         
         //TODO: replace with specific client data
         
-        channel.QueueBind(queue: _createQ, exchange: Constants.ORGANISATION_XCH(10), routingKey: $"{10}.create");
-        channel.QueueBind(queue: _inQ,     exchange: Constants.ORGANISATION_XCH(10), routingKey: $"{10}.in");
-        channel.QueueBind(queue: _outQ,    exchange: Constants.ORGANISATION_XCH(10), routingKey: $"{10}.out");
+        channel.QueueBind(queue: _createQ, exchange: ClientState._organisationExchangeName, routingKey: $"{ClientState._organisationId}.create");
+        channel.QueueBind(queue: _inQ,     exchange: ClientState._organisationExchangeName, routingKey: $"{ClientState._organisationId}.in");
+        channel.QueueBind(queue: _outQ,    exchange: ClientState._organisationExchangeName, routingKey: $"{ClientState._organisationId}.out");
     }
 
     private static void _attachOperationalConsumers(IModel channel)
@@ -91,7 +94,7 @@ public class AttachBindings
         HostState = State.WAITING;
         
         //TODO: replace with specific client data
-        var hostRequest = new HostRequestMessage(10, 1);
+        var hostRequest = new HostRequestMessage(ClientState._organisationId, ClientState._unitId);
         Publishers.SafePublisher.sendMessage(hostRequest);
     }
 }

@@ -23,31 +23,26 @@ namespace Vis.Server.Consumers
                 EventType = VisitorEventEnum.In,
                 Timestamp = request.Time
             };
-            
-            // get the current most recent event 
-            var currentVisitorEvent = Dbo.Instance.GetCollection<VisitorEvent>("events")
-                    .Find(visitorEvent => visitorEvent.VisitorId == incomingVisitorEvent.VisitorId).Sort("{Timestamp:-1}").Limit(1).ToList()[0];
+            //
+            // // get the current most recent event 
+            // var currentVisitorEvent = Dbo.Instance.GetCollection<VisitorEvent>("events")
+            //         .Find(visitorEvent => visitorEvent.VisitorId == incomingVisitorEvent.VisitorId)
+            //         .Sort("{Timestamp:-1}")
+            //         .Limit(1).ToList()[0];
+            //
+            // // if needs updating
+            // if (currentVisitorEvent.Timestamp < incomingVisitorEvent.Timestamp)
+            // {
+            //     var filter = Builders<VisitorEvent>.Filter
+            //         .Eq(visitorEvent => visitorEvent.Id, currentVisitorEvent.Id);
+            //     
+            //     var update = Builders<VisitorEvent>.Update
+            //         .Set(visitorEvent => visitorEvent.EventType, incomingVisitorEvent.EventType);
+            //     
+            //     Dbo.Instance.GetCollection<VisitorEvent>("events").UpdateOne(filter, update);
+            // }
 
-            // if needs updating
-            if (currentVisitorEvent.Timestamp < incomingVisitorEvent.Timestamp)
-            {
-                var filter = Builders<VisitorEvent>.Filter
-                    .Eq(visitorEvent => visitorEvent.Id, currentVisitorEvent.Id);
-                
-                var update = Builders<VisitorEvent>.Update
-                    .Set(visitorEvent => visitorEvent.EventType, incomingVisitorEvent.EventType);
-                
-                Dbo.Instance.GetCollection<VisitorEvent>("events").UpdateOne(filter, update);
-            }
-
-            using (var session = Dbo.Instance.Client.StartSession())
-            {
-                Logs.LogDebug("Attempting to start MongoDB transaction");
-                session.StartTransaction();
-                Dbo.Instance.GetCollection<VisitorEvent>("events").InsertOne(incomingVisitorEvent);
-                session.CommitTransaction();
-                Logs.LogDebug("MongoDB transaction committed successfully");
-            }
+            Dbo.Instance.InsertOne("events", incomingVisitorEvent);
            
             
 

@@ -26,7 +26,7 @@ namespace Vis.Client.Consumers
             string visitorData = "";
             try
             {
-                visitorData = httpClient.GetStringAsync($"http://{response.Host}:{response.Port}/visitors").Result;
+                visitorData = httpClient.GetStringAsync($"http://{response.Host}:{response.Port}/visitors?organisationid={ClientState._organisationId}").Result;
             }
             catch (Exception e)
             {

@@ -17,11 +17,29 @@ namespace Vis.Server.Endpoints
         public GetVisitors(string path) : base(path) { }
         protected override IResult callback(HttpContext context)
         {
-            Logs.Log(Logs.LogLevel.Info, "Got visitor request");
+
+            
+            
+            
 
             var data = new List<Common.Models.Results.VisitorResult>();
-
-            var visitors = Dbo.Instance.Database.GetCollection<Server.Models.Visitor>("people").Find(_ => true).ToList();
+            int organisationId;
+            try
+            {
+                var orgTemp = context.Request.Query["organisationid"].ToString();
+                organisationId = int.Parse(orgTemp);
+                Logs.Log(Logs.LogLevel.Info, $"Got visitor request for org: {organisationId}");
+            }
+            catch
+            {
+                Logs.LogWarning("Failed to parse organisation ID while handling visitor request");
+                return Results.Text(Common.Models.Serializer.SerializeJson(data));
+            }
+            
+            var visitors = Dbo.Instance
+                .GetCollection<Server.Models.Visitor>("people")
+                .Find(visitor => visitor.OrganisationId == organisationId)
+                .ToList();
             new VisitorStateParser().Execute();
 
             foreach (var visitor in visitors)

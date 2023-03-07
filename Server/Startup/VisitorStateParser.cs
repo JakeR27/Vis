@@ -27,7 +27,5 @@ public class VisitorStateParser : BaseStartupTask
             Logs.LogDebug($"{e.Timestamp} {e.VisitorId} - {e.EventType}");
             ServerData.visitorsStatus[e.VisitorId] = e.EventType;
         }
-
-        throw new NotImplementedException();
     }
 }
