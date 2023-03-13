@@ -12,7 +12,7 @@ using Vis.Common.Startup;
 
 namespace Vis.Client.Consumers
 {
-    internal class HostConsumer : BaseMessageConsumer
+    internal class HostConsumer : BaseMessageConsumer, ITaskCompleter
     {
         protected override void callback(object? model, BasicDeliverEventArgs args)
         {
@@ -31,6 +31,7 @@ namespace Vis.Client.Consumers
             catch (Exception e)
             {
                 Logs.Log(Logs.LogLevel.Error, "Could not get initial visitor data! Restart the client");
+                _hostStartupTask.ExternalFail("Could not get visitor data");
                 return;
             }
             
@@ -45,7 +46,13 @@ namespace Vis.Client.Consumers
             }
 
             //ClientData._serverHostFound = true;
-            AttachBindings.HostState = State.COMPLETE;
+            _hostStartupTask.ExternalComplete();
+        }
+
+        public BaseStartupTask _hostStartupTask { get; set; }
+        public void CompletesStartupTask(BaseStartupTask task)
+        {
+            _hostStartupTask = task;
         }
     }
 }

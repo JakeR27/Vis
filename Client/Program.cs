@@ -2,10 +2,13 @@
 using RabbitMQ.Client.Events;
 using System.Text;
 using Vis.Client.Consumers;
+using Vis.Client.Startup;
 using Vis.Common;
 using Vis.Common.Configuration;
 using Vis.Common.Models;
 using Vis.Common.Models.Messages;
+using Vis.Common.RabbitMq;
+using Vis.Common.Startup;
 
 namespace Vis.Client
 {
@@ -13,6 +16,12 @@ namespace Vis.Client
     {
         private static IModel _channel;
 
+        public static void GracefulExit(int code)
+        {
+            RmqConnect.Connection.Close();
+            Environment.Exit(code);
+        }
+        
         public static void Main()
         {
             // var connection = Vis.Common.RabbitMq.RmqConnect.Connect("backend", "backend");
@@ -61,23 +70,43 @@ namespace Vis.Client
             //
             Logs.Log(Logs.LogLevel.Debug, "Beginning startup");
 
-            var unitIdEnv = new IntegerConfigurationItem("VIS_UNIT_ID", 10);
-            var orgIdEnv = new IntegerConfigurationItem("VIS_ORGANISATION_ID", 1);
-            var orgSecEnv = new StringConfigurationItem("VIS_ORGANISATION_SECRET", "DEADBEEF");
+            
+            
+            //Vis.Client.Startup.AttachBindings.Begin();
+            // new RabbitMqConnector().Execute();
+            // var channel = RmqConnect.Connection.CreateModel();
+            //
+            // var AuthTask = new AuthNegotiator();
+            // AuthTask.Setup(channel);
+            // AuthTask.Execute();
+            //
+            // // wait for auth task
+            // while (AuthTask.TaskState != State.COMPLETE) {}
+            //
+            // var HostTask = new HostNegotiator();
+            // HostTask.Setup(channel);
+            // HostTask.Execute();
+            
+            // Logs.Log(Logs.LogLevel.Debug, "Waiting for startup to complete");
+            // while (HostTask.TaskState != State.COMPLETE) {} //wait for completion
 
-            ClientState._unitId = unitIdEnv.Value();
-            ClientState._organisationId = orgIdEnv.Value();
-            ClientState._organisationSecret = orgSecEnv.Value();
+            var taskRunner = new TaskRunner();
+            taskRunner.QueueTask(new ConfigurationParser());
+            taskRunner.QueueTask(new RabbitMqConnector());
+            taskRunner.QueueTask(new AuthNegotiator());
+            taskRunner.QueueTask(new HostNegotiator());
             
-            Vis.Client.Startup.AttachBindings.Begin();
-            
-            Logs.Log(Logs.LogLevel.Debug, "Waiting for startup to complete");
-            while (!Startup.AttachBindings.Completed) {} //wait for completion
+            var setupComplete = taskRunner.Run();
+
+            if (setupComplete == State.ERROR)
+            {
+                GracefulExit(1);
+            }
             
             Logs.Log(Logs.LogLevel.Info, "Startup completed. Application running...");
             
             ClientState.displayVisitors();
-             var running = true;
+            var running = true;
             while (running)
             {
                 //continue;
@@ -90,7 +119,7 @@ namespace Vis.Client
                 switch (input[0])
                 {
                     case 'c':
-                        Publishers.SafePublisher.sendMessage(new CreateVisitorMessage()
+                        Common.Publishers.SafePublisher.sendMessage(new CreateVisitorMessage()
                         {
                             Visitor =
                             {
@@ -103,7 +132,7 @@ namespace Vis.Client
                         });
                         break;
                     case 'i':
-                        Publishers.SafePublisher.sendMessage(new InVisitorMessage()
+                        Common.Publishers.SafePublisher.sendMessage(new InVisitorMessage()
                         {
                             VisitorId = ClientState.visitors.Values.ToList()[int.Parse(input[2..].ToString())].Guid,
                             Time = DateTime.UtcNow,
@@ -112,7 +141,7 @@ namespace Vis.Client
                         });
                         break;
                     case 'o':
-                        Publishers.SafePublisher.sendMessage(new OutVisitorMessage()
+                        Common.Publishers.SafePublisher.sendMessage(new OutVisitorMessage()
                         {
                             VisitorId = ClientState.visitors.Values.ToList()[int.Parse(input[2..].ToString())].Guid,
                             Time = DateTime.UtcNow,
@@ -121,7 +150,7 @@ namespace Vis.Client
                         });
                         break;
                     case 'q':
-                        Environment.Exit(0);
+                        GracefulExit(0);
                         break;
                 }
 

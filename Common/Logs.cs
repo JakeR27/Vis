@@ -9,8 +9,13 @@ namespace Vis.Common
     public static class Logs
     {
         private static string[] _logLevelStrings = { "DBG", "INF", "WRN", "ERR" };
-        private static LogLevel _logLevel = LogLevel.Debug;
+        private static LogLevel _logLevel = LogLevel.Error;
 
+        public static LogLevel LogLevelFromInt(int level)
+        {
+            return (LogLevel)level;
+        }
+        
         public enum LogLevel
         {
             Debug = 0,
@@ -36,6 +41,15 @@ namespace Vis.Common
                 _logLevelStrings[(int)level], 
                 message
             );
+        }
+
+        public static void SetLogLevel(LogLevel newLogLevel)
+        {
+            _logLevel = newLogLevel;
+        }
+        public static void SetLogLevel(int newLogLevel)
+        {
+            _logLevel = LogLevelFromInt(newLogLevel);
         }
     }
 }

@@ -5,15 +5,16 @@ namespace Vis.Common.RabbitMq;
 public class RmqConnect
 {
     private static ConnectionFactory? _factory;
+    public static IConnection Connection;
 
-    public static IConnection Connect(string username, string password)
+    public static void Connect(string username, string password, string hostname)
     {
         _factory ??= new ConnectionFactory()
         {
-            HostName = "ec2-13-42-23-89.eu-west-2.compute.amazonaws.com",
+            HostName = hostname,
             UserName = username, Password = password
         };
 
-        return _factory.CreateConnection();
+        Connection = _factory.CreateConnection();
     }
 }

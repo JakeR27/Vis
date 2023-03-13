@@ -21,7 +21,7 @@ namespace Vis.Server.Consumers
             var ORG_XCH = Vis.Constants.ORGANISATION_XCH(organisationId);
 
             // LOG
-            var logMsg = $"AUTH request received for {request.OrganisationId}.{request.UnitId} with {request.Secret}";
+            var logMsg = $"AUTH request received for {request.OrganisationId}.{request.UnitId} with '{request.Secret}'";
             Logs.Log(Logs.LogLevel.Info, logMsg);
 
 
@@ -29,12 +29,12 @@ namespace Vis.Server.Consumers
             var requiredSecret = Dbo.Instance
                 .GetCollection<OrganisationSecret>("secrets")
                 .Find(secret => secret.OrganisationId == organisationId)
-                .First();
+                .FirstOrDefault();
 
-            if (request.Secret == string.Empty || request.Secret != requiredSecret.Value)
+            if (requiredSecret is null || request.Secret == string.Empty || request.Secret != requiredSecret.Value)
             {
                 Logs.LogInfo($"Auth check failed for {organisationId}.{unitId}");
-                Logs.LogDebug($"{request.Secret} did not match {requiredSecret.Value}");
+                Logs.LogDebug($"{request.Secret} did not match {requiredSecret?.Value}");
                 Publishers.SafePublisher.sendMessage(new AuthResponseMessage(organisationId, unitId)
                 {
                     Success = false,

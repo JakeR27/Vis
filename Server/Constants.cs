@@ -14,6 +14,6 @@ public class Constants
     
     // new server only constants
     public static string ORGANISATION_XCH(int id) => $"org-{id}-xch";
-    public const string BACKEND_XCH = Common.Constants.BACKEND_XCH;
+    public const string BACKEND_XCH = "backend-xch";
 
 }

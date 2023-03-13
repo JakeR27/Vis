@@ -10,9 +10,16 @@ namespace Vis.Common
         private static List<IModel> _channels = new ();
         public static class SafePublisher
         {
+            private static IPublisher? _diskPublisher;
+            
             public static void useChannel(IModel model)
             {
                 _channels.Add(model);
+            }
+
+            public static void useDiskPublisher(IPublisher publisher)
+            {
+                _diskPublisher = publisher;
             }
 
             public static void send(string exchange, string routingKey,
@@ -35,7 +42,7 @@ namespace Vis.Common
 
                 if (!successful)
                 {
-                    DiskPublisher.send(exchange, routingKey, body);
+                    _diskPublisher?.send(exchange, routingKey, body);
                     Logs.Log(Logs.LogLevel.Warning, $"Message to {exchange} with key {routingKey} has been saved to disk");
                 }
                 Logs.Log(Logs.LogLevel.Info, $"Successfully sent message to {exchange} with key {routingKey}");

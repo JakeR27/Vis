@@ -9,29 +9,43 @@ namespace Vis.Client.Consumers
 {
     internal class AuthConsumer : BaseMessageConsumer
     {
+        private BaseStartupTask _authStartupTask;
+
         protected override void callback(object? model, BasicDeliverEventArgs args)
         {
             AuthResponseMessage response = Common.Models.Serializer.Deserialize<AuthResponseMessage>(args.Body.ToArray());
             string msg = $"Received AUTH response, success: {response.Success}, organisation xch: {response.OrganisationExchangeName}";
             Logs.Log(Logs.LogLevel.Info, msg);
 
-            if (AttachBindings.AuthState == State.WAITING)
+            Logs.LogDebug($"AuthState is {_authStartupTask.TaskState}");
+            
+            if (_authStartupTask.TaskState == State.WAITING)
             {
+                Logs.LogDebug("Inside auth status == waiting");
                 if (response.Success == true)
                 {
-                    AttachBindings.AuthState = State.COMPLETE;
+                    Logs.LogDebug("inside response.success == true");
+                    
+                    _authStartupTask.ExternalComplete();
+                    
+                    Logs.LogDebug("after set authstate = COMPLETE");
                     ClientState._organisationExchangeName = response.OrganisationExchangeName;
-                    ClientState._organisationExchangeFound = response.Success;
                 }
                 else
                 {
                     Logs.LogError("Auth with server failed. Check SECRET is correct");
+                    _authStartupTask.ExternalFail("Server authentication failed");
                 }
             }
             else
             {
                 Logs.LogWarning("Got auth response, but no auth request was sent");
             }
+        }
+        
+        public void CompletesStartupTask(BaseStartupTask task)
+        {
+            _authStartupTask = task;
         }
     }
 }
