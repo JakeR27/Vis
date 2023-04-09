@@ -35,10 +35,10 @@ namespace Vis.Server.Consumers
             {
                 Logs.LogInfo($"Auth check failed for {organisationId}.{unitId}");
                 Logs.LogDebug($"{request.Secret} did not match {requiredSecret?.Value}");
-                Publishers.SafePublisher.sendMessage(new AuthResponseMessage(organisationId, unitId)
+                Publishers.SafePublisher.send(new AuthResponseMessage(organisationId, unitId)
                 {
                     Success = false,
-                    OrganisationExchangeName = ORG_XCH
+                    OrganisationExchangeName = "ORG_XCH"
                 });
                 return;
             }
@@ -63,7 +63,7 @@ namespace Vis.Server.Consumers
                 OrganisationExchangeName = ORG_XCH
             };
 
-            Publishers.SafePublisher.sendMessage(response);
+            Publishers.SafePublisher.send(response);
 
             //var message = Encoding.UTF8.GetBytes(ORG_XCH);
             //Publishers.SafePublisher.send(

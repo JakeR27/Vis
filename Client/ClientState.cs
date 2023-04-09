@@ -1,4 +1,5 @@
-﻿using Vis.Common.Models;
+﻿using Vis.Common;
+using Vis.Common.Models;
 
 namespace Vis.Client
 {
@@ -19,7 +20,7 @@ namespace Vis.Client
         [Obsolete]
         public static void displayVisitors()
         {
-            //Console.Clear();
+            Console.Clear();
             int i = 0;
             foreach (var visitorEntry in ClientState.visitors)
             {

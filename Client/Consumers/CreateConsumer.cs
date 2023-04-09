@@ -17,7 +17,6 @@ namespace Vis.Client.Consumers
             Logs.Log(Logs.LogLevel.Info, msg);
 
             ClientState.visitors.Add(message.Visitor.Guid, message.Visitor);
-            
             ClientState.displayVisitors();
         }
     }

@@ -5,7 +5,7 @@ namespace Vis.Common.RabbitMq;
 public class RmqConnect
 {
     private static ConnectionFactory? _factory;
-    public static IConnection Connection;
+    public static IConnection? Connection;
 
     public static void Connect(string username, string password, string hostname)
     {
@@ -15,6 +15,19 @@ public class RmqConnect
             UserName = username, Password = password
         };
 
-        Connection = _factory.CreateConnection();
+        Connection ??= _factory.CreateConnection();
+    }
+    
+    public static IModel? CreateChannel()
+    {
+        try
+        {
+            return Connection?.CreateModel();
+        }
+        catch (Exception ex)
+        {
+            return null;
+        }
+        
     }
 }

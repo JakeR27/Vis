@@ -58,7 +58,7 @@ public class HostNegotiator : RabbitMqBaseStartupTask
         TaskState = State.WAITING;
         
         var hostRequest = new HostRequestMessage(ClientState._organisationId, ClientState._unitId);
-        Common.Publishers.SafePublisher.sendMessage(hostRequest);
+        Common.Publishers.SafePublisher.send(hostRequest);
         
         _PreventTaskAutoComplete();
     }

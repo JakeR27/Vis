@@ -12,6 +12,10 @@ public class VisitorStateParser : BaseStartupTask
 {
     protected override string _taskDescription => "Parses visitor event log to determine visitor state";
 
+    public VisitorStateParser()
+    {
+        ReadyState = State.COMPLETE;
+    }
     protected override void _execute()
     {
         //gets the most recent event for each visitor
@@ -20,6 +24,7 @@ public class VisitorStateParser : BaseStartupTask
             .OrderByDescending(ve=>ve.Timestamp)
             .GroupBy(ve=>ve.VisitorId)
             .Select(x=>x.First());
+            
         
         
         foreach (var e in t.ToList())

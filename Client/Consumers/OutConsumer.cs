@@ -18,7 +18,6 @@ namespace Vis.Client.Consumers
             Logs.Log(Logs.LogLevel.Info, msg);
 
             ClientState.visitorsStatus[message.VisitorId] = VisitorEventEnum.Out;
-
             ClientState.displayVisitors();
         }
     }

@@ -26,7 +26,7 @@ namespace Vis.Server.Consumers
             };
 
             // send response
-            Publishers.SafePublisher.sendMessage(response);
+            Publishers.SafePublisher.send(response);
 
             // log it
             Log(LogLevel.Info, Constants.BODY_AS_TEXT(args.Body));

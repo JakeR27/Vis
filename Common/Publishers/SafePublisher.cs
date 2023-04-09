@@ -22,14 +22,15 @@ namespace Vis.Common
                 _diskPublisher = publisher;
             }
 
-            public static void send(string exchange, string routingKey,
-                ReadOnlyMemory<byte> body = default)
+            public static void send<TMessage>(string exchange, string routingKey,
+                TMessage message)
             {
                 var successful = false;
                 for (var i = 0; i < _channels.Count && successful == false; i++)
                 {
                     try
                     {
+                        var body = Serializer.Serialize(message);
                         RabbitPublisher.send(_channels[i], exchange, routingKey, body);
                         successful = true;
                     }
@@ -42,15 +43,15 @@ namespace Vis.Common
 
                 if (!successful)
                 {
-                    _diskPublisher?.send(exchange, routingKey, body);
+                    _diskPublisher?.send(exchange, routingKey, message);
                     Logs.Log(Logs.LogLevel.Warning, $"Message to {exchange} with key {routingKey} has been saved to disk");
                 }
                 Logs.Log(Logs.LogLevel.Info, $"Successfully sent message to {exchange} with key {routingKey}");
             }
 
-            public static void sendMessage<T>(T message) where T : BaseMessage
+            public static void send<T>(T message) where T : BaseMessage
             {
-                send(exchange: message.DestinationExchange, routingKey: message.RoutingKey, body: Serializer.Serialize(message));
+                send(exchange: message.DestinationExchange, routingKey: message.RoutingKey, message: message);
             }
         }
     }

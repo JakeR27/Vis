@@ -2,6 +2,8 @@
 using RabbitMQ.Client.Events;
 using System.Text;
 using Vis.Client.Consumers;
+using Vis.Client.Database;
+using Vis.Client.Messages;
 using Vis.Client.Startup;
 using Vis.Common;
 using Vis.Common.Configuration;
@@ -18,7 +20,11 @@ namespace Vis.Client
 
         public static void GracefulExit(int code)
         {
-            RmqConnect.Connection.Close();
+            if (RmqConnect.Connection is { IsOpen: true })
+            {
+                RmqConnect.Connection.Close();
+                RmqConnect.Connection.Dispose();
+            }
             Environment.Exit(code);
         }
         
@@ -91,24 +97,44 @@ namespace Vis.Client
             // while (HostTask.TaskState != State.COMPLETE) {} //wait for completion
 
             var taskRunner = new TaskRunner();
+            taskRunner.TaskRunnerCancelled += (sender, args) =>
+            {
+                Logs.LogError("Task runner cancelled. Exiting...");
+                GracefulExit(1);
+            };
+            
             taskRunner.QueueTask(new ConfigurationParser());
             taskRunner.QueueTask(new RabbitMqConnector());
+            taskRunner.QueueTask(new DiskPublisherRegistrar());
+            taskRunner.QueueTask(new Resender());
             taskRunner.QueueTask(new AuthNegotiator());
             taskRunner.QueueTask(new HostNegotiator());
             
             var setupComplete = taskRunner.Run();
-
+            
             if (setupComplete == State.ERROR)
             {
                 GracefulExit(1);
             }
+
+            // LiteDb.Instance.Insert<InVisitorMessage>(new InVisitorMessage()
+            // {
+            //     DestinationExchange = ClientState._organisationExchangeName,
+            //     Id = Guid.NewGuid(),
+            //     RoutingKey = $"{ClientState._organisationId}.in",
+            //     Time = DateTime.UtcNow,
+            //     VisitorId = Guid.NewGuid()
+            // });
+            
             
             Logs.Log(Logs.LogLevel.Info, "Startup completed. Application running...");
             
-            ClientState.displayVisitors();
+            
             var running = true;
+            ClientState.displayVisitors();
             while (running)
             {
+                //ClientState.displayVisitors();
                 //continue;
                 Console.WriteLine("enter command");
                 var input = Console.ReadLine();
@@ -119,7 +145,7 @@ namespace Vis.Client
                 switch (input[0])
                 {
                     case 'c':
-                        Common.Publishers.SafePublisher.sendMessage(new CreateVisitorMessage()
+                        Common.Publishers.SafePublisher.send(new CreateVisitorMessage()
                         {
                             Visitor =
                             {
@@ -132,7 +158,7 @@ namespace Vis.Client
                         });
                         break;
                     case 'i':
-                        Common.Publishers.SafePublisher.sendMessage(new InVisitorMessage()
+                        Common.Publishers.SafePublisher.send(new InVisitorMessage()
                         {
                             VisitorId = ClientState.visitors.Values.ToList()[int.Parse(input[2..].ToString())].Guid,
                             Time = DateTime.UtcNow,
@@ -141,13 +167,16 @@ namespace Vis.Client
                         });
                         break;
                     case 'o':
-                        Common.Publishers.SafePublisher.sendMessage(new OutVisitorMessage()
+                        Common.Publishers.SafePublisher.send(new OutVisitorMessage()
                         {
                             VisitorId = ClientState.visitors.Values.ToList()[int.Parse(input[2..].ToString())].Guid,
                             Time = DateTime.UtcNow,
                             DestinationExchange = ClientState._organisationExchangeName,
                             RoutingKey = $"{ClientState._organisationId}.out"
                         });
+                        break;
+                    case 'd':
+                        ClientState.displayVisitors();
                         break;
                     case 'q':
                         GracefulExit(0);

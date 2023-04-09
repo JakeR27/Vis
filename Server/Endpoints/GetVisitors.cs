@@ -17,11 +17,7 @@ namespace Vis.Server.Endpoints
         public GetVisitors(string path) : base(path) { }
         protected override IResult callback(HttpContext context)
         {
-
             
-            
-            
-
             var data = new List<Common.Models.Results.VisitorResult>();
             int organisationId;
             try

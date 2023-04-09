@@ -1,4 +1,5 @@
 ﻿using RabbitMQ.Client;
+using Vis.Client.Database;
 using Vis.Common;
 using Vis.Common.Models;
 using Vis.Common.Models.Messages;
@@ -10,6 +11,7 @@ namespace Vis.Client.Publishers
         public void send<TMessage>(string exchange, string routingKey, TMessage message)
         {
             //save to database
+            LiteDb.Instance.Insert(message);
         }
         
     }

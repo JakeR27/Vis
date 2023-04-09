@@ -28,13 +28,11 @@ public class AuthNegotiator : Common.Startup.RabbitMqBaseStartupTask
         var authConsumer = new AuthConsumer();
         authConsumer.CompletesStartupTask(this);
         authConsumer.Attach(_rabbitMqChannel, _authQ);
-        
-       
-        
+
         TaskState = State.WAITING;
         
         var authRequest = new AuthRequestMessage(ClientState._organisationId, ClientState._unitId, ClientState._organisationSecret);
-        Common.Publishers.SafePublisher.sendMessage(authRequest);
+        Common.Publishers.SafePublisher.send(authRequest);
         
         _PreventTaskAutoComplete();
     }

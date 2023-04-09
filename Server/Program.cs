@@ -7,6 +7,7 @@ using Vis.Common.Models;
 using Vis.Server.Consumers;
 using Vis.Server.Database;
 using Vis.Server.Endpoints;
+using Vis.Server.Startup;
 
 namespace Vis.Server
 {
@@ -16,6 +17,8 @@ namespace Vis.Server
 
         public static void Main()
         {
+            new ConfigurationParser().Execute();
+            
             var factory = new ConnectionFactory()
                 { HostName = "ec2-13-42-23-89.eu-west-2.compute.amazonaws.com", UserName = "backend", Password = "backend" };
 
