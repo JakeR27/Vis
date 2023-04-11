@@ -1,0 +1,58 @@
+@startuml
+!define ABSTRACT &#123;abstract&#125;
+!define OVERRIDE &#123;override&#125;
+skinparam classAttributeIconSize 0
+
+package Vis.Common.Configuration <<Folder>> {
+
+abstract class ConfigurationItem<TItem> {
+    --Constructors--
+    #ConfigurationItem(string, TItem)
+    --Fields--
+    #string \t _environmentVariable
+    #TItem \t _defaultValue
+    --Methods--
+    -string? \t GetFromEnvironment()
+    +TItem \t Value()
+    .. ABSTRACT ..
+    #  TItem \t _value(string)
+}
+
+class BooleanConfigurationItem {
+    --Constructors--
+        +BoolConfigurationItem(string, bool)
+    --Fields--
+    --Methods--
+    .. OVERRIDE ..
+    #bool \t _value(string)
+}
+
+class IntegerConfigurationItem {
+    --Constructors--
+        +IntegerConfigurationItem(string, int)
+    --Fields--
+    --Methods--
+    .. OVERRIDE ..
+    #int \t\t _value(string)
+}
+
+class StringConfigurationItem {
+    --Constructors--
+        +StringConfigurationItem(string, string)
+    --Fields--
+    --Methods--
+    .. OVERRIDE ..
+    #string \t _value(string)
+}
+
+ConfigurationItem <|-- BooleanConfigurationItem : <bool>
+ConfigurationItem <|-- IntegerConfigurationItem : <int>
+ConfigurationItem <|-- StringConfigurationItem : <string>
+
+
+
+}
+
+
+
+@enduml
