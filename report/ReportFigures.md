@@ -9,7 +9,7 @@
    * [Figure 2.D](#figure-2d)
    * 
 
-
+# Figures
 
 ### Figure 2.A
 ![Figure 2.A](./figure2a.png)
