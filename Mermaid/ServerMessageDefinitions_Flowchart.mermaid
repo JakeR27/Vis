@@ -1,0 +1,32 @@
+flowchart LR
+    
+    subgraph Exchanges 
+        o1xch((OID1-Exchange))
+        o2xch((OID2-Exchange))
+        bxch((Backend-Exchange))
+        dxch((Discovery-Exchange))
+    end
+
+    o1xch --< *.* >--> bxch
+    o2xch --< *.* >--> bxch
+
+    subgraph Queues
+        cq[CREATE]
+        iq[IN]
+        oq[OUT]
+        hq[HOST]
+        aq[AUTH]
+    end
+    
+    bxch --< *.create >--> cq
+    bxch --< *.in >--> iq
+    bxch --< *.out >--> oq
+    dxch --< oid.uid.req.host >--> hq
+    dxch --< oid.uid.req.auth >--> aq
+
+    S(Server)
+    
+    cq & iq & oq & hq & aq --- S
+    
+    dxch <-- < oid.uid.res.host > ---> S
+    dxch <-- < oid.uid.res.auth > ---> S
