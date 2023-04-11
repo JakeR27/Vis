@@ -1,0 +1,67 @@
+@startuml
+!define ABSTRACT &#123;abstract&#125;
+!define OVERRIDE &#123;override&#125;
+skinparam classAttributeIconSize 0
+
+class Exception<<from .net>>
+class IModel<<from MongoDB>>
+
+package Vis.Common.Publishers {
+
+interface IPublisher {
+    +void \t Send<TMessage>(string, string, TMessage)
+}
+
+enum PublisherFailReason {
+    Unknown
+    ChannelClosed
+    ConnectionClosed
+}
+
+class PublisherFailException {
+    --Fields--
+    -PublisherFailReason _failureReason
+    --Constructor--
+    +PublisherFailException(PublisherFailReason)
+}
+
+class RabbitPublisher <<static>> {
+    --Fields--
+    --Methods--
+    +void \t Send(IModel, string, string, byte[])
+}
+
+class SafePublisher<<static>> {
+    --Fields--
+    -List<IModel> \t _channels
+    -List<IPublisher> \t _publishers
+    --Methods--
+    +void \t\t\t UseChannel(IModel)
+    +void \t\t\t UsePublisher(IPublisher)
+    +void \t\t\t Send<TMessage>(string, string, TMessage)
+    +void \t\t\t Send(BaseMessage)
+}
+
+}
+
+package Vis.Client.Publishers {
+    class DiskPublisher {
+        --Fields--
+        --Methods--
+        +void \t Send<TMessage>(string, string, TMessage)
+    }
+}
+
+
+
+PublisherFailException -r-|> Exception : Implements
+IPublisher <|-- RabbitPublisher : Implements
+IPublisher <|-l- DiskPublisher : Implements
+SafePublisher "1" *-- "many" IPublisher : use
+SafePublisher "1" *-r- "many" IModel : use
+RabbitPublisher *-u- IModel : use
+PublisherFailException *-l- PublisherFailReason
+RabbitPublisher --> PublisherFailException : Throws
+
+
+@enduml
