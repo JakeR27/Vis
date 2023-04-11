@@ -12,7 +12,7 @@
 
 
 ### Figure 2.A
-![Figure 2.A](./report/figure2a.png)
+![Figure 2.A](./figure2a.png)
 
 ### Figure 2.B
 
