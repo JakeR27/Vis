@@ -2,7 +2,7 @@
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using static Vis.Common.Logs;
-namespace Vis.Common
+namespace Vis.Common.Consumers
 {
     public abstract class BaseMessageConsumer
     {

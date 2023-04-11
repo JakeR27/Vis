@@ -1,12 +1,16 @@
 ﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
+using MongoDB.Driver;
 using Vis.Common;
+using Vis.Common.Consumers;
 using Vis.Common.Models.Messages;
+using Vis.Server.Database;
+using Vis.Server.Models;
 
 namespace Vis.Server.Consumers
 {
-    internal class AuthConsumer : Common.BaseMessageConsumer
+    internal class AuthConsumer : BaseMessageConsumer
     {
         protected override void callback(object? model, BasicDeliverEventArgs args)
         {
@@ -14,18 +18,33 @@ namespace Vis.Server.Consumers
             // parse routeing key
             var organisationId = request.OrganisationId;
             var unitId = request.UnitId;
+            var ORG_XCH = Vis.Constants.ORGANISATION_XCH(organisationId);
 
             // LOG
-            var logMsg = $"AUTH request received for {request.OrganisationId}.{request.UnitId} with {request.Secret}";
+            var logMsg = $"AUTH request received for {request.OrganisationId}.{request.UnitId} with '{request.Secret}'";
             Logs.Log(Logs.LogLevel.Info, logMsg);
 
 
             // VALIDATE SECRET
-            // if (request.Secret == ...) { }
+            var requiredSecret = Dbo.Instance
+                .GetCollection<OrganisationSecret>("secrets")
+                .Find(secret => secret.OrganisationId == organisationId)
+                .FirstOrDefault();
+
+            if (requiredSecret is null || request.Secret == string.Empty || request.Secret != requiredSecret.Value)
+            {
+                Logs.LogInfo($"Auth check failed for {organisationId}.{unitId}");
+                Logs.LogDebug($"{request.Secret} did not match {requiredSecret?.Value}");
+                Publishers.SafePublisher.send(new AuthResponseMessage(organisationId, unitId)
+                {
+                    Success = false,
+                    OrganisationExchangeName = "ORG_XCH"
+                });
+                return;
+            }
 
 
             // create and link exchange
-            var ORG_XCH = Vis.Constants.ORGANISATION_XCH(organisationId);
             _channel.ExchangeDeclare(
                 exchange: ORG_XCH, 
                 type: ExchangeType.Topic
@@ -44,7 +63,7 @@ namespace Vis.Server.Consumers
                 OrganisationExchangeName = ORG_XCH
             };
 
-            Publishers.SafePublisher.sendMessage(response);
+            Publishers.SafePublisher.send(response);
 
             //var message = Encoding.UTF8.GetBytes(ORG_XCH);
             //Publishers.SafePublisher.send(

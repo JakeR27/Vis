@@ -1,0 +1,46 @@
+classDiagram    
+BaseMessage <-- AuthRequestMessage
+BaseMessage <-- HostRequestMessage
+BaseMessage <-- AuthResponseMessage
+BaseMessage <-- HostResponseMessage
+
+BaseMessage <-- CreateVisitorMessage
+BaseMessage <-- InVisitorMessage
+BaseMessage <-- OutVisitorMessage
+
+BaseMessage : + guid Id
+BaseMessage : + string DestinationExchange
+BaseMessage : + stirng RoutingKey
+
+AuthRequestMessage : + int OrganisationId
+AuthRequestMessage : + int UnitId
+AuthRequestMessage : + string Secret
+AuthRequestMessage : + AuthRequestMessage()
+
+HostRequestMessage : + int OrganisationId
+HostRequestMessage : + int UnitId
+HostRequestMessage : + HostRequestMessage()
+
+AuthResponseMessage : + bool Success
+AuthResponseMessage : + string OrganisationExchangeName
+AuthResponseMessage : + AuthResponseMessage()
+
+HostResponseMessage : + string Host
+HostResponseMessage : + int Port
+HostResponseMessage : + HostResponseMessage()
+
+CreateVisitorMessage : + Visitor Visitor
+CreateVisitorMessage *-- Visitor
+
+InVisitorMessage : + guid VisitorId
+InVisitorMessage : + datetime Time
+
+OutVisitorMessage : + guid VisitorId
+OutVisitorMessage : + datetime Time
+
+Visitor : + guid Guid
+Visitor : + int OrganisationId
+Visitor : + string Name
+    
+
+

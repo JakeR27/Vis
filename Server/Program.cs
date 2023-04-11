@@ -1,7 +1,13 @@
 ﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
+using MongoDB.Driver;
+using Vis.Common;
+using Vis.Common.Models;
 using Vis.Server.Consumers;
+using Vis.Server.Database;
+using Vis.Server.Endpoints;
+using Vis.Server.Startup;
 
 namespace Vis.Server
 {
@@ -11,6 +17,8 @@ namespace Vis.Server
 
         public static void Main()
         {
+            new ConfigurationParser().Execute();
+            
             var factory = new ConnectionFactory()
                 { HostName = "ec2-13-42-23-89.eu-west-2.compute.amazonaws.com", UserName = "backend", Password = "backend" };
 
@@ -67,7 +75,7 @@ namespace Vis.Server
                 routingKey: "*.out"
             );
 
-            _channel.ExchangeDeclare(exchange: "discovery-xch", type: ExchangeType.Topic);
+            _channel.ExchangeDeclare(exchange: Constants.DISCOVERY_XCH, type: ExchangeType.Topic);
             _channel.QueueBind(
                 queue: "backend-requests-host", 
                 exchange: Constants.DISCOVERY_XCH,
@@ -79,11 +87,38 @@ namespace Vis.Server
                 routingKey: "*.*.requests.auth"
             );
 
+            var attachHost = Environment.GetEnvironmentVariable("VIS_HANDLE_HOST_REQUESTS");
+
             new CreateConsumer().Attach(_channel, "backend-create");
             new InConsumer().Attach(_channel, "backend-in");
             new OutConsumer().Attach(_channel, "backend-out");
-            new HostConsumer().Attach(_channel, "backend-requests-host");
+
+            // if environment variable set to TRUE (or if not set then default to TRUE)
+            if (attachHost?.Equals("true") ?? true)
+            {
+                Logs.LogInfo("Attached host consumer - responding to host requests");
+                new HostConsumer().Attach(_channel, "backend-requests-host");
+            }
+            
             new AuthConsumer().Attach(_channel, "backend-requests-auth");
+            new GetVisitors("/visitors").handle();
+            Vis.WebServer.App.WebApp.Urls.Add("http://*:5000");
+            Vis.WebServer.App.WebApp.RunAsync();
+
+
+            var database = Dbo.Instance.Database;
+            var visitors = database.GetCollection<Server.Models.Visitor>("people").Find(_ => true).ToList();
+
+            new Startup.VisitorStateParser().Execute();
+            
+            //TODO - INIT VISITOR STATUS FROM EVENT COLLECTION
+            
+            foreach (var visitor in visitors)
+            {
+                ServerData.visitors.Add(visitor.Guid, visitor);
+                Logs.Log(Logs.LogLevel.Debug, visitor.Name);
+            }
+
 
             Console.WriteLine("Listening for messages, press [Enter] to exit");
             Console.ReadLine();

@@ -1,0 +1,44 @@
+%%{ init: {'theme': 'dark', "graph": {"htmlLabels": true}}, "flowchart": {"defaultRenderer": "elk"} }%%
+flowchart LR
+    
+    subgraph Queues
+        CREATE
+        IN
+        OUT
+        HOST
+        AUTH
+    end
+    C --o CREATE
+    C --o IN
+    C --o OUT
+    C --o HOST
+    C --o AUTH
+    C(Client)
+    
+    subgraph Exchanges
+        oxch((OID-Exchange))
+        dxch((Discovery-Exchange))
+    end
+
+    
+    CREATE <--< oid.create >--> oxch
+    IN <--< oid.in >--> oxch
+    OUT <--< oid.out >--> oxch
+    
+    
+
+    
+
+    C --< oid.create >--> oxch
+    C --< oid.in >--> oxch
+    C --< oid.out >---> oxch
+
+    C --< oid.uid.res.host >--> dxch
+    C --< oid.uid.res.auth >--> dxch
+    
+    HOST <--< oid.uid.res.host >--> dxch
+    AUTH <--< oid.uid.res.auth >--> dxch
+
+    
+    
+    

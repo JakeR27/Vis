@@ -2,7 +2,8 @@
 {
     public class Visitor
     {
-        public Guid Id;
+        public Guid Guid;
+        public int OrganisationId;
         public string Name;
     }
 }

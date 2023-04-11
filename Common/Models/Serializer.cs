@@ -20,5 +20,19 @@ namespace Vis.Common.Models
             Logs.Log(Logs.LogLevel.Debug, JsonString);
             return System.Text.Json.JsonSerializer.Deserialize<T>(JsonString, Options)!;
         }
+
+        public static string SerializeJson<T>(T obj)
+        {
+            var JsonString = System.Text.Json.JsonSerializer.Serialize(obj, Options);
+            Logs.Log(Logs.LogLevel.Debug, JsonString);
+            return JsonString;
+        }
+
+        public static T DeserializeJson<T>(string json)
+        {
+            var JsonString = json;
+            Logs.Log(Logs.LogLevel.Debug, JsonString);
+            return System.Text.Json.JsonSerializer.Deserialize<T>(JsonString, Options)!;
+        }
     }
 }

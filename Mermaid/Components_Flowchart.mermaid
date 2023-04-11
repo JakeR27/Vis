@@ -1,0 +1,17 @@
+%%{ init: {'theme': 'dark', "graph": {"htmlLabels": true}}, "flowchart": {"defaultRenderer": "elk"} }%%
+flowchart LR
+
+    subgraph Essential
+        Client <--Messages--> Broker
+    end
+    subgraph Extension
+        Broker <--Messages--> Server
+        Server <--> Database
+    end
+    style Broker fill:#55afffaa
+    style Database fill:#55afffaa
+
+    
+    
+    
+    

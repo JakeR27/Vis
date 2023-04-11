@@ -1,0 +1,79 @@
+classDiagram
+BaseMessageConsumer <-- AuthConsumer
+BaseMessageConsumer <-- HostConsumer
+BaseMessageConsumer <-- CreateConsumer
+BaseMessageConsumer <-- InConsumer
+BaseMessageConsumer <-- OutConsumer
+
+class BaseMessageConsumer {
+    #IModel _channel
+    +void Attach(IModel, string)
+    #void callback(object, EventArgs)
+    -void _callback(object, EventArgs)
+    -void _log(EventArgs)
+}
+
+BaseMessageConsumer *-- EventArgs
+
+class EventArgs {
+    <<from RabbitMQ>>
+    +string ConsumerTag
+    +string DeliveryTag
+    +bool Redelivered
+    +string Exchange
+    +string RoutingKey
+    +IBasicProperties BasicProperties
+    +byte Body
+}
+
+class ITaskCompleter{
+    <<interface>>
+    +void CompletesStartupTask(BaseStartupTask)
+}
+
+class AuthConsumer {
+    -BaseStartupTask _authStartupTask
+    #void callback()
+}
+
+class HostConsumer {
+    -BaseStartupTask _hostStartupTask
+    #void callback()
+}
+
+CreateConsumer : #void callback()
+InConsumer : #void callback()
+OutConsumer : #void callback()
+
+AuthConsumer --|> ITaskCompleter
+HostConsumer --|> ITaskCompleter
+
+AuthConsumer o-- BaseStartupTask
+HostConsumer o-- BaseStartupTask
+
+class BaseStartupTask{
+    +State TaskState
+    +State ReadyState
+    -bool _autoComplete
+    -string _friendlyName
+    
+    +void Execute()
+    #void _TaskFailed(string)
+    #void _PreventTaskAutoComplete()
+    #void _execute()
+    +void ExternalComplete()
+    +void ExternalFail(string)
+    -void _fail(Exception)
+    
+}
+
+BaseStartupTask *-- State
+
+class State {
+    <<enumeration>>
+    UNSTARTED
+    STARTED
+    WAITING
+    COMPLETE
+    ERROR
+}
