@@ -1,0 +1,39 @@
+﻿@startuml
+!define ABSTRACT &#123;abstract&#125;
+!define OVERRIDE &#123;override&#125;
+skinparam classAttributeIconSize 0
+
+package Vis.Common {
+
+class Logs <<static>> {
+    --Fields--
+    -string[] \t\t _logLevelStrings
+    -LogLevel \t _logLevel
+    --Methods--
+    +void \t\t LogDebug(string)
+    +void \t\t LogInfo(string)
+    +void \t\t LogWarning(string)
+    +void \t\t LogError(string)
+    +void \t\t Log(LogLevel, string)
+    ..
+    +LogLevel \t LogLevelFromInt(int)
+    +void \t\t SetLoggingLevel(int)
+    +void \t\t SetLoggingLevel(LogLevel)
+    --Internal Objects--
+    LogLevel
+}
+
+enum LogLevel {
+        Debug
+        Info
+        Warning
+        Error
+}
+
+Logs o-r- LogLevel
+
+
+
+
+}
+@enduml

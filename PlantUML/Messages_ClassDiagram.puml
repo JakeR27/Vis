@@ -1,0 +1,83 @@
+﻿@startuml
+!define ABSTRACT &#123;abstract&#125;
+!define OVERRIDE &#123;override&#125;
+skinparam classAttributeIconSize 0
+
+package Vis.Common.Models.Messages {
+
+abstract class BaseMessage {
+    --Fields--
+    +Guid \t Id
+    +string \t DestinationExchange
+    +string \t RoutingKey
+}
+
+class AuthRequestMessage {
+    --Constructors--
+    +AuthRequestMessage()
+    +AuthRequestMessage(int, int, string)
+    --Fields--
+    +int \t\t OrganisationId
+    +int \t\t UnitId
+    +string \t Secret
+}
+
+class AuthResponseMessage {
+    --Constructors--
+    +AuthResponseMessage()
+    +AuthResponseMessage(int, int)
+    --Fields--
+    +bool \t Success
+    +string \t OrganisationExchangeName
+}
+
+class HostRequestMessage {
+    --Constructors--
+    +HostRequestMessage()
+    +HostRequestMessage(int, int)
+    --Fields--
+    +int \t\t OrganisationId
+    +int \t\t UnitId
+}
+
+class HostResponseMessage {
+    --Constructors--
+    +HostResponseMessage()
+    +HostResponseMessage(int, int, string)
+    --Fields--
+    +int \t\t Port
+    +string \t Host
+}
+
+class CreateVisitorMessage {
+    --Fields--
+    +Visitor \t Visitor
+}
+
+class InVisitorMessage {
+    --Fields--
+    +Guid \t\t VisitorId
+    +DateTime \t Time
+}
+
+class OutVisitorMessage {
+    --Fields--
+    +Guid \t\t VisitorId
+    +DateTime \t Time
+}
+
+BaseMessage <|-- AuthRequestMessage
+BaseMessage <|-- AuthResponseMessage
+BaseMessage <|-- HostRequestMessage
+BaseMessage <|-- HostResponseMessage
+BaseMessage <|-- CreateVisitorMessage
+BaseMessage <|-- InVisitorMessage
+BaseMessage <|-- OutVisitorMessage
+
+
+
+}
+
+
+
+@enduml

@@ -20,7 +20,7 @@ enum PublisherFailReason {
 
 class PublisherFailException {
     --Fields--
-    -PublisherFailReason _failureReason
+    -PublisherFailReason \t _failureReason
     --Constructor--
     +PublisherFailException(PublisherFailReason)
 }
@@ -33,7 +33,7 @@ class RabbitPublisher <<static>> {
 
 class SafePublisher<<static>> {
     --Fields--
-    -List<IModel> \t _channels
+    -List<IModel> \t\t _channels
     -List<IPublisher> \t _publishers
     --Methods--
     +void \t\t\t UseChannel(IModel)
@@ -54,13 +54,13 @@ package Vis.Client.Publishers {
 
 
 
-PublisherFailException -r-|> Exception : Implements
+PublisherFailException --|> Exception : Implements
 IPublisher <|-- RabbitPublisher : Implements
-IPublisher <|-l- DiskPublisher : Implements
+IPublisher <|-- DiskPublisher : Implements
 SafePublisher "1" *-- "many" IPublisher : use
-SafePublisher "1" *-r- "many" IModel : use
-RabbitPublisher *-u- IModel : use
-PublisherFailException *-l- PublisherFailReason
+SafePublisher "1" *-- "many" IModel : use
+RabbitPublisher *-- IModel : use
+PublisherFailException *-- PublisherFailReason
 RabbitPublisher --> PublisherFailException : Throws
 
 

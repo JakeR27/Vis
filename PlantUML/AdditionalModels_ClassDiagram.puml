@@ -1,0 +1,83 @@
+﻿@startuml
+!define ABSTRACT &#123;abstract&#125;
+!define OVERRIDE &#123;override&#125;
+skinparam classAttributeIconSize 0
+
+package Vis.Common.Models {
+
+class Visitor {
+    --Fields--
+    +Guid \t Guid
+    +int \t\t OrganisationId
+    +string \t Name
+}
+
+enum VisitorEventEnum {
+    In
+    Out
+}
+
+class OrganisationSecret {
+    --Fields--
+    +int \t\t OrganisationId
+    +string \t Value
+}
+
+package Vis.Server.Models {
+    class OrganisationSecret {
+        --Fields--
+        +ObjectId \t Id
+    }
+    class Visitor {
+    --Fields--
+        +ObjectId \t Id
+    }
+    class VisitorEvent {
+        --Fields--
+        +ObjectId \t\t Id
+        +ObjectId \t\t VisitorId
+        +VisitorEventEnum \t Event
+        +DateTime \t\t Timestamp
+    }
+}
+
+package Vis.Client {
+    class Constants {
+    --Fields--
+    +string \t AUTH_RESPONSE_KEY(int, int)
+    +string \t HOST_RESPONSE_KEY(int, int)
+    }
+}
+
+package Vis.Common {
+    class Constants {
+        --Fields--
+        +string \t DISCOVERY_XCH
+        --Methods--
+        +string \t BODY_AS_TEXT(dynamic)
+    }
+}
+
+package Vis.Server {
+    class Constants {
+        --Fields--
+        +string \t BACKEND_XCH
+        --Methods--
+        +string \t ORGANISATION_XCH(int)
+        +string \t AUTH_REQUEST_KEY(int, int)
+        +string \t HOST_REQUEST_KEY(int, int)
+    }
+    
+}
+
+Vis.Server.Constants -up-|> Vis.Common.Constants : extends
+Vis.Client.Constants -up-|> Vis.Common.Constants : extends
+Vis.Server.Models.OrganisationSecret -up-|> Vis.Common.Models.OrganisationSecret : extends
+Vis.Server.Models.Visitor -up-|> Vis.Common.Models.Visitor : extends
+Vis.Server.Models.VisitorEvent -up-o Vis.Common.Models.VisitorEventEnum : uses
+
+}
+
+
+
+@enduml
