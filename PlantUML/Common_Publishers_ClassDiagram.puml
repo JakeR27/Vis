@@ -54,12 +54,12 @@ package Vis.Client.Publishers {
 
 
 
-PublisherFailException --|> Exception : Implements
+PublisherFailException -l-|> Exception : Implements
 IPublisher <|-- RabbitPublisher : Implements
-IPublisher <|-- DiskPublisher : Implements
+IPublisher <|-l- DiskPublisher : Implements
 SafePublisher "1" *-- "many" IPublisher : use
-SafePublisher "1" *-- "many" IModel : use
-RabbitPublisher *-- IModel : use
+SafePublisher "1" *-d- "many" IModel : use
+RabbitPublisher *-u- IModel : use
 PublisherFailException *-- PublisherFailReason
 RabbitPublisher --> PublisherFailException : Throws
 
