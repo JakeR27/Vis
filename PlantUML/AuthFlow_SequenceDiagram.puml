@@ -1,0 +1,38 @@
+﻿@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+actor User as U
+participant Client as C
+queue "Auth Messages" as CQ
+entity Broker as B
+queue "Auth Messages" as SQ
+participant Server as S
+Database Database as D
+
+U --> C : Start Client unit
+C --> C : Startup tasks
+C --> B : Publish AUTH request
+B --> SQ : Deliver AUTH request 
+loop Wait for AUTH request
+SQ <-- S : Check for requests
+S <-- SQ : Deliver requests
+S --> S : Parse requests
+end loop
+S --> D : Query AUTH SECRET
+D --> S : Return AUTH SECRET
+S --> S : Verify AUTH SECRET
+
+S --> B : Publish AUTH response
+B --> CQ : Deliver AUTH response
+
+loop Wait for AUTH response
+C --> CQ : Check for responses
+CQ --> C : Deliver responses
+C --> C : Parse responses
+end loop
+
+C --> U : Log AUTH outcome
+
+@enduml

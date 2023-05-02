@@ -1,0 +1,21 @@
+﻿@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+actor User as U
+database "Client Database" as CD
+participant Client as C
+entity Broker as B
+participant Server as S
+
+U --> C : Perform action
+activate C
+C --> B : Attempt to publish message
+C --> C : Detect failed publish
+C --> CD : Write failed message to database
+deactivate C
+
+
+
+@enduml

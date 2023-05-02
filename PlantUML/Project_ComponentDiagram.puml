@@ -1,0 +1,37 @@
+﻿@startuml
+'https://plantuml.com/component-diagram
+
+
+package "Essential Components" {
+:user:
+  
+cloud {
+[Broker]
+() AMQP
+[Broker] -u- AMQP
+}
+
+node Client {
+    [Client]
+    interface "User Interaction"
+    [Client] -l- "User Interaction"
+    Client -> AMQP
+    user -u-> "User Interaction"
+}
+}
+
+package "Extension Components" {
+
+cloud {
+[Database]
+() HTTP
+[Database] -u- HTTP
+}
+
+[Server] -d-> HTTP
+[Server] -l-> AMQP
+}
+
+
+
+@enduml

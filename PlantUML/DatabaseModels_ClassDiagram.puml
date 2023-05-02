@@ -1,0 +1,61 @@
+﻿@startuml
+'https://plantuml.com/class-diagram
+
+package "Server Database Models" {
+
+class OrganisationSecret {
+    +ObjectId \t Id
+    +int \t\t OrganisationId
+    +string \t Value
+}
+
+class Visitor {
+    +ObjectId \t Id
+    +Guid \t Guid
+    +int \t\t OrganisationId
+    +string \t Name
+}
+
+class VisitorEvent {
+    +ObjectId \t\t\t Id
+    +Guid \t\t\t VisitorId
+    +VisitorEventEnum \t EventType
+    +DateTime \t\t Timestamp
+}
+
+OrganisationSecret -[hidden]l- Visitor
+
+}
+
+package "Client Database Models" {
+
+abstract class BaseMessage {
+    +Guid \t Id
+    +string \t DestinationExchange
+    +string \t RoutingKey
+}
+
+class InVisitorMessage {
+    +Guid \t\t VisitorId
+    +DateTime \t Time
+}
+
+class OutVisitorMessage {
+    +Guid \t\t VisitorId
+    +DateTime \t Time
+}
+
+class CreateVisitorMessage {
+    +Visitor \t Visitor
+    }
+    
+InVisitorMessage -u-|> BaseMessage : extends
+OutVisitorMessage -u-|> BaseMessage : extends
+CreateVisitorMessage -u-|> BaseMessage : extends
+
+}
+
+
+
+
+@enduml

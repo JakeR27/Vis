@@ -1,0 +1,42 @@
+﻿@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+actor User as U
+participant Client as C
+queue "Auth Messages" as CQ
+entity Broker as B
+queue "Auth Messages" as SQ
+participant Server as S
+actor "External Service" as E
+
+U --> C : Start Client unit
+C --> C : Startup tasks
+C --> B : Publish HOST request
+B --> SQ : Deliver HOST request 
+loop Wait for HOST request
+SQ <-- S : Check for requests
+S <-- SQ : Deliver requests
+S --> S : Parse requests
+end loop
+S --> E : Query hostname
+E --> S : Return hostname
+
+S --> S : Construct HOST response
+
+S --> B : Publish HOST response
+B --> CQ : Deliver HOST response
+
+loop Wait for HOST response
+C --> CQ : Check for responses
+CQ --> C : Deliver responses
+C --> C : Parse responses
+end loop
+
+C --> U : Log HOST outcome
+
+C --> S : Request synchronisation data
+S --> C : Respond with synchronisation data
+
+@enduml

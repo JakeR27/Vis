@@ -73,9 +73,6 @@ BaseMessage <|-- HostResponseMessage
 BaseMessage <|-- CreateVisitorMessage
 BaseMessage <|-- InVisitorMessage
 BaseMessage <|-- OutVisitorMessage
-
-
-
 }
 
 

@@ -1,0 +1,575 @@
+﻿@startuml
+'https://plantuml.com/class-diagram
+!define F --Fields--
+!define C --Constructors--
+!define M --Methods--
+!define T \t
+!define TT \t\t
+!define A --{abstract}--
+!define S --{static}--
+!define O --{override}--
+
+package Vis.Common.Consumers {
+    abstract class BaseMessageConsumer {
+        F
+        #IModel T _channel
+        M
+        +void TT Attach(IModel, string)
+        -void TT _callback(object, BasicDeliverEventArgs)
+        A
+        #void TT callback(object, BasicDeliverEventArgs)
+        S
+        -void TT _log(BasicDeliverEventArgs)
+    }
+}
+
+package Vis.Common.Startup {
+    interface ITaskCompleter {
+        M
+        +void T CompletesStartupTask(BaseStartupTask)
+    }
+
+    enum State {
+        UNSTARTED
+        STARTED
+        WAITING
+        COMPLETE
+        ERROR
+    }
+    abstract class BaseStartupTask {
+        C
+        #BaseStartupTask()
+        F
+        +State T TaskState
+        +State T ReadyState
+        -bool TT _autoComplete
+        -string T _FriendlyName
+        M
+        +void TT Execute()
+        +void TT ExternalComplete()
+        +void TT ExternalFail(string)
+        #void TT _TaskFailed(string)
+        #void TT _PreventTaskAutoCompelte()
+        -void TT _fail(Exception)
+        A
+        #string T _taskDescription
+        #void TT _execute()
+    }
+    abstract class RabbitMqStartupTask {
+        F
+        #IModel T _rabbitMqChannel
+        M
+        +void TT Setup(IModel)
+    }
+    class RabbitMqConfigurationParser {
+    C
+    +RabbitMqConfigurationParser()
+    F
+    +string T RabbitMqUsername
+    +string T RabbitMqPassword
+    +string T RabbitMqHostname
+    O
+    +void TT _execute()
+    }
+    Vis.Common.Startup.RabbitMqConfigurationParser --|> Vis.Common.Startup.BaseStartupTask : extends
+    Vis.Common.Startup.RabbitMqConfigurationParser o-- Vis.Common.Startup.State : uses
+    Vis.Common.Startup.RabbitMqConfigurationParser o-- Vis.Common.Configuration.StringConfigurationItem : uses
+    class RabbitMqConnector {
+    C
+    +RabbitMqConnector()
+    F
+    +RabbitMqConfigurationParser T _configuration
+    O
+    +void _execute()
+    }
+    Vis.Common.Startup.RabbitMqConnector --|> Vis.Common.Startup.BaseStartupTask : extends
+    Vis.Common.Startup.RabbitMqConnector o-- Vis.Common.Startup.State : uses
+    Vis.Common.Startup.RabbitMqConnector o-- Vis.Common.Configuration.StringConfigurationItem : uses
+    Vis.Common.Startup.RabbitMqConnector o-- Vis.Common.Publishers.SafePublisher : uses
+    
+    class TaskRunner {
+    F
+    -Queue<(BaseStartupTask, int)>T  _startupTasks
+    -BaseStartupTask TT TT _currentTask
+    +EventHandler TT TT T TaskRunnerCancelled
+    M
+    +void TT TT TT T QueueTask(BaseStartupTask, int)
+    +State TT TT TT Run()
+    -State _runNextTask()
+    -void _runTask()
+    -void resetTimer()
+    -void _timerOnElapsed(object?, ElapsedEventArgs)
+    
+    }
+    Vis.Common.Startup.TaskRunner o-- Vis.Common.Startup.State : uses
+    Vis.Common.Startup.TaskRunner o-- Vis.Common.Startup.BaseStartupTask : uses
+        
+}
+
+Vis.Common.Startup.BaseStartupTask o-- Vis.Common.Startup.State : uses
+Vis.Common.Startup.ITaskCompleter o-- Vis.Common.Startup.BaseStartupTask : uses
+Vis.Common.Startup.RabbitMqStartupTask --|> Vis.Common.Startup.BaseStartupTask : extends
+Vis.Common.Startup.RabbitMqStartupTask o-- Vis.Common.Startup.State : uses
+
+package Vis.Client.Consumers {
+    class AuthConsumer {
+    F
+    -BaseStartupTask T _authStartupTask
+    O
+    #void TT TT callback(object?, BasicDeliverEventArgs)
+    }
+    class HostConsumer {
+    F
+    -BaseStartupTask T _hostStartupTask
+    O
+    #void TT TT callback(object?, BasicDeliverEventArgs)
+    }
+    class CreateConsumer {
+    O
+    #void T callback(object?, BasicDeliverEventArgs)
+    }
+    class InConsumer {
+    O
+    #void T callback(object?, BasicDeliverEventArgs)
+    }
+    class OutConsumer {
+    O
+    #void T callback(object?, BasicDeliverEventArgs)
+    }
+}
+
+Vis.Client.Consumers.AuthConsumer o-- Vis.Common.Startup.BaseStartupTask : uses
+Vis.Client.Consumers.AuthConsumer --|> Vis.Common.Consumers.BaseMessageConsumer : extends
+Vis.Client.Consumers.AuthConsumer --|> Vis.Common.Startup.ITaskCompleter : implements
+Vis.Client.Consumers.HostConsumer o-- Vis.Common.Startup.BaseStartupTask : uses
+Vis.Client.Consumers.HostConsumer --|> Vis.Common.Consumers.BaseMessageConsumer : extends
+Vis.Client.Consumers.HostConsumer --|> Vis.Common.Startup.ITaskCompleter : implements
+Vis.Client.Consumers.CreateConsumer --|> Vis.Common.Consumers.BaseMessageConsumer : extends
+Vis.Client.Consumers.InConsumer --|> Vis.Common.Consumers.BaseMessageConsumer : extends
+Vis.Client.Consumers.OutConsumer --|> Vis.Common.Consumers.BaseMessageConsumer : extends
+
+package Vis.Client.Database {
+class LiteDb {
+    C
+    -LiteDb()
+    F
+    +LiteDatabase T Dbo
+    M
+    +void TT T Insert<TMessage>(TMessage)
+    S
+    +LiteDb TT Instance
+}
+
+}
+
+package Vis.Client.Messages {
+    class Resender {
+    C
+    +Resender()
+    O
+    #string T _taskDescription
+    #void TT _execute()
+    }
+}
+
+package Vis.Client.Publishers {
+class DiskPublisher {
+    M
+    +void T send<TMessage>(string, string, TMessage)
+}
+}
+
+Vis.Client.Publishers.DiskPublisher --|> Vis.Common.IPublisher : implements
+Vis.Client.Publishers.DiskPublisher o-- Vis.Client.Database.LiteDb : uses
+
+package Vis.Common {
+    interface IPublisher {
+        +void T send<TMessage>(string, string, TMessage)
+    }
+}
+
+Vis.Client.Messages.Resender o-- Vis.Client.Database.LiteDb : uses
+Vis.Client.Messages.Resender --|> Vis.Common.Consumers.BaseMessageConsumer : extends
+
+package Vis.Client.Startup {
+class AuthNegotiator {
+O
+#string T _taskDescription
+#void TT _execute()
+}
+Vis.Client.Startup.AuthNegotiator --|> Vis.Common.Startup.RabbitMqStartupTask : extends
+Vis.Client.Startup.AuthNegotiator o-- Vis.Common.Startup.State : uses
+Vis.Client.Startup.AuthNegotiator o-- Vis.Client.Consumers.AuthConsumer : has
+Vis.Client.Startup.AuthNegotiator o-- Vis.Common.Models.Messages.AuthRequestMessage : has
+Vis.Client.Startup.AuthNegotiator o-- Vis.Common.Publishers.SafePublisher : uses
+
+class ConfigurationParser {
+C
++ConfigurationParser()
+O
+#string T _taskDescription
+#void TT _execute()
+}
+Vis.Client.Startup.ConfigurationParser --|> Vis.Common.Startup.BaseStartupTask : extends
+Vis.Client.Startup.ConfigurationParser o-- Vis.Common.Configuration.IntegerConfigurationItem : uses
+Vis.Client.Startup.ConfigurationParser o-- Vis.Common.Configuration.StringConfigurationItem : uses
+Vis.Client.Startup.ConfigurationParser o-- Vis.Common.Configuration.BoolConfigurationItem : uses
+Vis.Client.Startup.ConfigurationParser o-- Vis.Common.Startup.State : uses
+
+class DiskPublisherRegistrar {
+C
++DiskPublisherRegistrar()
+O
+#string T _taskDescription
+#void TT _execute()
+}
+Vis.Client.Startup.ConfigurationParser --|> Vis.Common.Startup.BaseStartupTask : extends
+Vis.Client.Startup.ConfigurationParser o-- Vis.Common.Publishers.SafePublisher : uses
+Vis.Client.Startup.ConfigurationParser o-- Vis.Client.Publishers.DiskPublisher : uses
+Vis.Client.Startup.ConfigurationParser o-- Vis.Common.Startup.State : uses
+
+class HostNegotiator {
+O
+#string T _taskDescription
+#void TT _execute()
+}
+Vis.Client.Startup.HostNegotiator --|> Vis.Common.Startup.RabbitMqStartupTask : extends
+Vis.Client.Startup.HostNegotiator o-- Vis.Common.Startup.State : uses
+Vis.Client.Startup.HostNegotiator o-- Vis.Client.Consumers.HostConsumer : has
+Vis.Client.Startup.HostNegotiator o-- Vis.Common.Models.Messages.HostRequestMessage : has
+Vis.Client.Startup.HostNegotiator o-- Vis.Common.Publishers.SafePublisher : uses
+}
+
+package Vis.Common.Configuration {
+abstract class ConfigurationItem<TItem> {
+C
+#ConfigurationItem(string, TItem)
+F
+#string T _environmentVariable
+#TItem T _defaultValue
+M
+-string? T GetFromEnvironment()
++TItem T Value()
+A
+#TItem T _value(string)
+}
+
+class IntegerConfigurationItem {
+C
++IntegerConfigurationItem(string, int)
+O
+#int T _value(string)
+}
+Vis.Common.Configuration.IntegerConfigurationItem --|> Vis.Common.Configuration.ConfigurationItem : <int>
+
+class StringConfigurationItem {
+C
++StringConfigurationItem(string, string)
+O
+#string T _value(string)
+}
+Vis.Common.Configuration.StringConfigurationItem --|> Vis.Common.Configuration.ConfigurationItem : <string>
+
+class BoolConfigurationItem {
+C
++BoolConfigurationItem(string, bool)
+O
+#int T _value(string)
+}
+Vis.Common.Configuration.BoolConfigurationItem --|> Vis.Common.Configuration.ConfigurationItem : <bool>
+}
+
+package Vis.Common.Models.Messages {
+
+abstract class BaseMessage {
+    --Fields--
+    +Guid \t Id
+    +string \t DestinationExchange
+    +string \t RoutingKey
+}
+
+class AuthRequestMessage {
+    --Constructors--
+    +AuthRequestMessage()
+    +AuthRequestMessage(int, int, string)
+    --Fields--
+    +int \t\t OrganisationId
+    +int \t\t UnitId
+    +string \t Secret
+}
+
+class AuthResponseMessage {
+    --Constructors--
+    +AuthResponseMessage()
+    +AuthResponseMessage(int, int)
+    --Fields--
+    +bool \t Success
+    +string \t OrganisationExchangeName
+}
+
+class HostRequestMessage {
+    --Constructors--
+    +HostRequestMessage()
+    +HostRequestMessage(int, int)
+    --Fields--
+    +int \t\t OrganisationId
+    +int \t\t UnitId
+}
+
+class HostResponseMessage {
+    --Constructors--
+    +HostResponseMessage()
+    +HostResponseMessage(int, int, string)
+    --Fields--
+    +int \t\t Port
+    +string \t Host
+}
+
+class CreateVisitorMessage {
+    --Fields--
+    +Visitor \t Visitor
+}
+
+class InVisitorMessage {
+    --Fields--
+    +Guid \t\t VisitorId
+    +DateTime \t Time
+}
+
+class OutVisitorMessage {
+    --Fields--
+    +Guid \t\t VisitorId
+    +DateTime \t Time
+}
+
+BaseMessage <|-- AuthRequestMessage
+BaseMessage <|-- AuthResponseMessage
+BaseMessage <|-- HostRequestMessage
+BaseMessage <|-- HostResponseMessage
+BaseMessage <|-- CreateVisitorMessage
+BaseMessage <|-- InVisitorMessage
+BaseMessage <|-- OutVisitorMessage
+}
+
+package Vis.Common.Models.Results {
+class VisitorResult {
+F
++Visitor TT T Visitor
++VisitorEventEnum T status
+}
+Vis.Common.Models.Results.VisitorResult o-- Vis.Common.Models.Visitor : has
+Vis.Common.Models.Results.VisitorResult o-- Vis.Common.Models.VisitorEventEnum : has
+}
+
+package Vis.Common.Models {
+class Visitor {
+F
++Guid T Guid
++int TT OrganisationId
++string T Name
+}
+class OrganisationSecret {
+F
++int TT OrganisationId
++string T Value
+}
+class Serializer <static> {
+S
++JsonSerializerOptions T Options
++byte[] TT TT Serialize<Type>(Type)
++Type TT TT Deserialize<Type>(byte[])
++string TT TT SerializeJson<Type>(Type)
++Type TT TT DeserializeJson<Type>(string)
+}
+
+enum VisitorEventEnum {
+IN
+OUT
+}
+}
+
+package Vis.Common.Publishers {
+    enum PublisherFailReason {
+    Unknown
+    ChannelClosed
+    ConnectionClosed
+    }
+    class PublisherFailException {
+    C
+    +PublisherFailException(PublisherFailReason)
+    }
+    Vis.Common.Publishers.PublisherFailException o-- Vis.Common.Publishers.PublisherFailReason : uses
+    
+    class PublisherMessage {
+    C
+    -PublisherMessage()
+    +PublisherMessage(string, string, byte[])
+    F
+    +string T TT exchange
+    +string T TT routingKey
+    +byte[] T TT message
+    M
+    +byte[] T TT Serialize() 
+    +PublisherMessage T Deserialize(byte[])
+    S
+    -long TT TT messageId
+    }
+    
+    class RabbitPublisher <static> {
+    }
+    Vis.Common.Publishers.RabbitPublisher o-- Vis.Common.Publishers.PublisherMessage : uses
+    Vis.Common.Publishers.RabbitPublisher --|> Vis.Common.IPublisher : implements
+    
+    class SafePublisher {
+    F
+    -List<IModel> T _channels
+    S
+    +void T useChannel(IModel)
+    +void T useDiskPublisher(IPublisher)
+    +void T send<Type>(Type)
+    }
+    Vis.Common.Publishers.SafePublisher --|> Vis.Common.IPublisher : implements
+    
+}
+
+package Vis.Server.Consumers {
+    class AuthConsumer {
+    O
+    #void T callback(object?, BasicDeliverEventArgs)
+    }
+    Vis.Server.Consumers.AuthConsumer --|> Vis.Common.Consumers.BaseMessageConsumer : extends
+    Vis.Server.Consumers.AuthConsumer o-- Vis.Common.Publishers.SafePublisher : uses
+    Vis.Server.Consumers.AuthConsumer o-- Vis.Common.Models.Messages.AuthRequestMessage : uses
+    Vis.Server.Consumers.AuthConsumer o-- Vis.Common.Models.Messages.AuthResponseMessage : uses
+    Vis.Server.Consumers.AuthConsumer o-- Vis.Common.Models.OrganisationSecret : uses
+    Vis.Server.Consumers.AuthConsumer o-- Vis.Common.Models.Serializer : uses
+    Vis.Server.Consumers.AuthConsumer o-- Vis.Server.Database.Dbo : uses
+    
+    class CreateConsumer {
+    O
+    #void T callback(object?, BasicDeliverEventArgs)
+    }
+    Vis.Server.Consumers.CreateConsumer --|> Vis.Common.Consumers.BaseMessageConsumer : extends
+    Vis.Server.Consumers.CreateConsumer o-- Vis.Common.Publishers.SafePublisher : uses
+    Vis.Server.Consumers.CreateConsumer o-- Vis.Common.Models.Messages.CreateVisitorMessage : uses
+    Vis.Server.Consumers.CreateConsumer o-- Vis.Common.Models.Visitor : uses
+    Vis.Server.Consumers.CreateConsumer o-- Vis.Common.Models.Serializer : uses
+    Vis.Server.Consumers.CreateConsumer o-- Vis.Server.Database.Dbo : uses
+    
+    class HostConsumer {
+    O
+    #void T callback(object?, BasicDeliverEventArgs)
+    }
+    Vis.Server.Consumers.HostConsumer --|> Vis.Common.Consumers.BaseMessageConsumer : extends
+    Vis.Server.Consumers.HostConsumer o-- Vis.Common.Publishers.SafePublisher : uses
+    Vis.Server.Consumers.HostConsumer o-- Vis.Common.Models.Messages.HostRequestMessage : uses
+    Vis.Server.Consumers.HostConsumer o-- Vis.Common.Models.Messages.HostResponseMessage : uses
+    Vis.Server.Consumers.HostConsumer o-- Vis.Common.Models.Serializer : uses
+    
+    class InConsumer {
+    O
+    #void T callback(object?, BasicDeliverEventArgs)
+    }
+    Vis.Server.Consumers.InConsumer --|> Vis.Common.Consumers.BaseMessageConsumer : extends
+    Vis.Server.Consumers.InConsumer o-- Vis.Common.Publishers.SafePublisher : uses
+    Vis.Server.Consumers.InConsumer o-- Vis.Common.Models.Messages.InVisitorMessage : uses
+    Vis.Server.Consumers.InConsumer o-- Vis.Server.Models.VisitorEvent : uses
+    Vis.Server.Consumers.InConsumer o-- Vis.Common.Models.Serializer : uses
+    Vis.Server.Consumers.InConsumer o-- Vis.Server.Database.Dbo : uses
+        
+}
+
+package Vis.Server.Database {
+class Dbo {
+C
+-Dbo()
+F
++MongoClient TT TT T Client
++IMongoDatabase TT TT Database
+M
++IMongoCollection<TCollection> T GetCollection(string)
++void TT TT TT T InsertOne<TDocument>(string, TDocument)
+S
+-Dbo? TT TT TT _instance
+-MongoClient TT TT T _client
++Dbo TT TT TT T Instance
+}
+}
+
+package Vis.Server.Endpoints {
+abstract class BaseGet {
+C
++BaseGet(string)
+F
+#string T _path
+M
++void TT handle()
+-IResult T _callback()
+A
+#IResult T _callback(HttpContext)
+}
+
+class GetVisitors {
+C
++GetVisitors(string)
+O
+#IResult T _callback(HttpContext)
+}
+Vis.Server.Endpoints.GetVisitors --|> Vis.Server.Endpoints.BaseGet : extends
+Vis.Server.Endpoints.GetVisitors o-- Vis.Server.Database.Dbo : uses 
+Vis.Server.Endpoints.GetVisitors o-- Vis.Server.Models.Visitor : uses 
+Vis.Server.Endpoints.GetVisitors o-- Vis.Common.Models.Results.VisitorResult : uses 
+Vis.Server.Endpoints.GetVisitors o-- Vis.Common.Models.Serializer : uses 
+
+}
+
+package Vis.Server.Models {
+class OrganisationSecret {
+F
++ObjectId T Id
+}
+Vis.Server.Models.OrganisationSecret --|> Vis.Common.Models.OrganisationSecret : extends
+class Visitor {
+F
++ObjectId T Id
+}
+Vis.Server.Models.Visitor --|> Vis.Common.Models.Visitor : extends
+class VisitorEvent {
+F
++ObjectId TT T Id
++Guid TT T VisitorId
++VisitorEventEnum T Event
++DateTime TT Timetamp
+}
+Vis.Server.Models.VisitorEvent o-- Vis.Common.Models.VisitorEventEnum : uses
+}
+
+package Vis.Server.Startup {
+class ConfigurationParser {
+C
++ConfigurationParser()
+O
+#string T _taskDescription
+#void T _execute()
+}
+Vis.Server.Startup.ConfigurationParser --|> Vis.Common.Startup.BaseStartupTask : extends
+Vis.Server.Startup.ConfigurationParser --|> Vis.Common.Configuration.IntegerConfigurationItem : uses
+Vis.Server.Startup.ConfigurationParser --|> Vis.Common.Startup.State : uses
+
+
+class VisitorStateParser {
+C
++VisitorStateParser()
+O
+#string T _taskDescription
+#void T _execute()
+}
+Vis.Server.Startup.ConfigurationParser --|> Vis.Common.Startup.BaseStartupTask : extends
+Vis.Server.Startup.ConfigurationParser --|> Vis.Common.Startup.State : uses
+Vis.Server.Startup.ConfigurationParser --|> Vis.Server.Database.Dbo : uses
+Vis.Server.Startup.ConfigurationParser --|> Vis.Server.Models.VisitorEvent : uses
+}
+
+
+
+@enduml

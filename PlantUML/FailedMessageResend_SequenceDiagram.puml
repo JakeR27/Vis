@@ -1,0 +1,28 @@
+﻿@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+actor User as U
+database "Client Database" as CD
+participant Client as C
+entity Broker as B
+participant Server as S
+
+U -> C : Start Client unit
+C -> C : Startup tasks
+
+
+C -> CD : Query failed-to-publish messages
+activate C
+CD -> C : Return failed-to-publish messages
+deactivate C
+loop
+C -> B : Publish message
+C -> C : Verify message published
+C --> CD : Write failed-to-publish message
+end loop
+
+
+
+@enduml
